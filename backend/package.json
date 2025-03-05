@@ -1,0 +1,26 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "backend for the project",
+  "keywords": [
+    "backend"
+  ],
+  "homepage": "https://github.com/sasmit545/IT-Project-2025#readme",
+  "bugs": {
+    "url": "https://github.com/sasmit545/IT-Project-2025/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sasmit545/IT-Project-2025.git"
+  },
+  "license": "ISC",
+  "author": "sasmit",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
