@@ -1,5 +1,6 @@
 import {Router} from "express"
-
+import {registerUser} from "../controller/user.controller.js"
+import {upload} from "../middleware/multer.middleware.js"
 const router=Router()
 
 
@@ -11,7 +12,7 @@ const router=Router()
 //         })
 //     }
 // )// wokringggg
-
+router.route("/register").post(upload.none(),registerUser)
 
 
 

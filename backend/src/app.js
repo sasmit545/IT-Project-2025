@@ -1,7 +1,7 @@
 import express from "express"
 import cors from 'cors'
 import cookieParser from "cookie-parser";
-
+import { upload } from "./middleware/multer.middleware.js";
 const app=express()
 app.use(cors(
     {

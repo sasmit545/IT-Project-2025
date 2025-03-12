@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import bcrypt from "bcrypt";
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -21,7 +21,10 @@ const userSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Website'
         }
-    ]
+    ],
+    refreshToken:{
+        type: String
+    }
 
 
 },{ timestamps: true });
