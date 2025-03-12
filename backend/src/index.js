@@ -13,7 +13,7 @@ then(()=>{
             throw error
         })
     app.listen(process.env.PORT,()=>{
-        console.log("APP WORKING ON PORT ",`${process.env.PORT}`)
+        console.log("APP WORKING ON PORT ",`${process.env.PORT}`,"http://localhost:8000/")
     })
 })
 .catch((err)=>{
