@@ -1,9 +1,8 @@
-import connection from "./db/connect.js";
 import dotenv from 'dotenv'
+dotenv.config()  
+import connection from "./db/connect.js";
+
 import app from "./app.js";
-dotenv.config({
-path:'./.env'
-})  
 
 console.log("HELLO IT PROJECTT")
 connection().

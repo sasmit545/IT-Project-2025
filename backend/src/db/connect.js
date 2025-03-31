@@ -4,6 +4,7 @@ import express from "express"
 const app=express()
 const connection = async ()=>{
     try {
+        console.log(`${process.env.MONGODB}/${DB_NAME}`);
         const connectionInstance = await mongoose.connect(`${process.env.MONGODB}/${DB_NAME}`)
         app.on("error",(error)=>{
             console.log("error in connecting")
