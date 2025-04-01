@@ -52,6 +52,24 @@ const componentsList = [
         href: "#",
         closing: 1,
     },
+    {
+        id: "input-text",
+        label: "Text Input",
+        content: "Enter text",
+        type: "text",
+        style: { width: "100%", padding: "5px", borderRadius: "4px", border: "1px solid #ccc" },
+        placeholder: "Enter text",
+        closing: 0,
+    },
+    {
+        id: "input-email",
+        label: "Email Input",
+        content: "Enter text",
+        type: "email",
+        style: { width: "100%", padding: "5px", borderRadius: "4px", border: "1px solid #ccc" },
+        placeholder: "Enter text",
+        closing: 0,
+    }
 ]
 
 // Added element categories
@@ -60,6 +78,7 @@ const componentCategories = [
     { id: "layout", label: "Layout", components: ["container"] },
     { id: "media", label: "Media", components: ["image"] },
     { id: "navigation", label: "Navigation", components: ["link", "list"] },
+    { id: "forms", label: "Forms", components: ["input-text","input-email"] },
 ]
 
 function DraggableComponent({ id, content }) {
