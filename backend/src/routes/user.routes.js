@@ -6,7 +6,7 @@ const router=Router()
 
 router.route("/register").post(Upload.none(),createUser)
 
-router.route("/login",Upload.none()).post(loginUser)
+router.route("/login").post(Upload.none(),loginUser)
 
 export default router
 
