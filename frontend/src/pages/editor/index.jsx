@@ -32,7 +32,7 @@ const componentsList = [
         content: "",
         type: "img",
         style: { width: "100%", maxWidth: "300px" },
-        src: "https://via.placeholder.com/300",
+        src: "q",
         alt: "Placeholder image",
         closing: 0,
     },
@@ -508,7 +508,7 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
     if (!selectedElement)
         return (
-            <div style={{ width: "20%", padding: "10px", borderLeft: "2px solid gray" }}>
+            <div style={{  padding: "10px", borderLeft: "2px solid gray" }}>
                 <h3>Style Editor</h3>
                 <p>Select an element to edit its properties</p>
             </div>
@@ -562,7 +562,7 @@ function RightPanel({ selectedElement, setComponents, components }) {
     };
 
     return (
-        <div style={{ width: "20%", padding: "10px", borderLeft: "2px solid gray", overflowY: "auto" }}>
+        <div style={{  padding: "10px", borderLeft: "2px solid gray", overflowY: "auto" }}>
             <h3>Style Editor</h3>
             <div style={{ marginBottom: "15px" }}>
                 <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>
