@@ -1,0 +1,497 @@
+/* Editor styles */
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: normal;
+  font-size: 14px;
+}
+
+.editor-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: #121212;
+  border-bottom: 1px solid #333;
+}
+
+.sidebar-toggle {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  margin-right: 1rem;
+}
+
+.editor-header h1 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.editor-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  width: 100%;
+}
+
+.editor-sidebar {
+  width: 250px;
+  padding: 1rem;
+  border-right: 2px solid #333;
+  overflow-y: auto;
+  transition: width 0.3s ease;
+}
+
+.editor-sidebar.closed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.editor-sidebar h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.canvas-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.canvas-toolbar {
+  padding: 0.5rem;
+  background-color: #1a1a1a;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.toolbar-button {
+  display: flex;
+  color: #fff;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 0px solid transparent;
+  background: rgba(100, 77, 237, 0.08);
+  border-radius: 0.75rem;
+  transition: all 0.2s linear;
+  cursor: pointer;
+}
+
+.toolbar-button:hover:not(.disabled) {
+  background: rgba(100, 77, 237, 0.12);
+}
+
+.toolbar-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.canvas-area {
+  flex: 1;
+  border: 2px dashed gray;
+  background: white;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: auto;
+  position: relative;
+  color: #000;
+}
+
+.canvas-area.drop-active {
+  background: #f0f9ff;
+}
+
+.canvas-placeholder {
+  color: #999;
+  text-align: center;
+  margin: auto;
+}
+
+.canvas-item {
+  position: relative;
+  margin: 0.25rem 0;
+}
+
+.delete-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.delete-button:hover {
+  opacity: 1;
+}
+
+.right-panel {
+  width: 280px;
+  padding: 1rem;
+  border-left: 2px solid #333;
+  overflow-y: auto;
+}
+
+.empty-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.right-panel h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.element-type {
+  margin-bottom: 1rem;
+}
+
+.element-type label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.element-type span {
+  font-weight: normal;
+}
+
+.style-section {
+  margin-bottom: 1.5rem;
+}
+
+.style-section h4 {
+  border-bottom: 1px solid #444;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.style-control {
+  margin-bottom: 1rem;
+}
+
+.style-control label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.style-control input[type="color"] {
+  width: 100%;
+  height: 2rem;
+  border: none;
+  border-radius: 4px;
+  background: #333;
+}
+
+.style-control input[type="text"],
+.style-control select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #333;
+  color: #fff;
+}
+
+.range-control {
+  display: flex;
+  align-items: center;
+}
+
+.range-control input[type="range"] {
+  flex: 1;
+  background: #333;
+}
+
+.range-value {
+  margin-left: 0.5rem;
+  min-width: 3rem;
+  text-align: right;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.button-group button {
+  flex: 1;
+  background: #333;
+  color: #fff;
+  padding: 0.5rem;
+  border: 1px solid #444;
+  cursor: pointer;
+}
+
+.button-group button.active {
+  background: #555;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+}
+
+.button-grid button {
+  background: #333;
+  color: #fff;
+  padding: 0.5rem;
+  border: 1px solid #444;
+  cursor: pointer;
+}
+
+.button-grid button.active {
+  background: #555;
+}
+
+.button-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.preset-button {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: white;
+}
+
+.preset-button.green {
+  background-color: #4caf50;
+}
+
+.preset-button.red {
+  background-color: #f44336;
+}
+
+.preset-button.blue {
+  background-color: #2196f3;
+}
+
+.editor-actions {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.action-button {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.preview-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.preview-button:hover {
+  background-color: #45a049;
+}
+
+.export-button {
+  background-color: #2196f3;
+  color: white;
+}
+
+.export-button:hover {
+  background-color: #0b7dda;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 80%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  color: #333;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-actions .action-button {
+  padding: 0.5rem 1rem;
+}
+
+.export-html {
+  background-color: #4caf50;
+  color: white;
+}
+
+.export-json,
+.export-react {
+  background-color: #2196f3;
+  color: white;
+}
+
+.copy-code {
+  background-color: #9c27b0;
+  color: white;
+}
+
+.preview-area {
+  flex: 1;
+  border: 1px solid #ddd;
+  padding: 1.5rem;
+  overflow: auto;
+  background: #fff;
+  margin-bottom: 1rem;
+}
+
+.html-output,
+.code-preview {
+  padding: 1rem;
+  background: #f5f5f5;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.html-output h3,
+.code-preview h3 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.html-output pre,
+.code-preview pre {
+  white-space: pre-wrap;
+  font-size: 0.875rem;
+  font-family: monospace;
+  margin: 0;
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .right-panel {
+    width: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .editor-sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 10;
+    background: #1a1a1a;
+    width: 250px;
+  }
+
+  .editor-sidebar.closed {
+    transform: translateX(-100%);
+  }
+
+  .right-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    z-index: 10;
+    background: #1a1a1a;
+    width: 250px;
+    transform: translateX(100%);
+  }
+
+  .right-panel.active {
+    transform: translateX(0);
+  }
+
+  .modal-content {
+    width: 95%;
+    height: 90%;
+    padding: 1rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+}

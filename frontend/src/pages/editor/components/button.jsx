@@ -1,3 +1,5 @@
+"use client"
+
 return (
     <div style={{ width: "20%", padding: "10px", borderLeft: "2px solid gray", overflowY: "auto" }}>
         <h3>Style Editor</h3>
