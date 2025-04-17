@@ -2,7 +2,7 @@ import User from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.utils.js";
 import { ApiResponse } from "../utils/ApiResponse.utils.js";
 import asyncHandler from "../utils/AsyncHandler.utils.js";
-
+import jwt from "jsonwebtoken";
 const verifyJwt = asyncHandler(async (req, res, next) => {
     try {
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
@@ -10,7 +10,7 @@ const verifyJwt = asyncHandler(async (req, res, next) => {
         if (!token) {
             throw new ApiError(401, "Unauthorised Request,User doesnt have access token")
         }
-        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET_AUTH)
 
         if (!decodedToken) {
             throw new ApiError(401, "Unauthorised Request,User doesnt have valid access token")

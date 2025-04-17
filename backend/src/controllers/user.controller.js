@@ -27,22 +27,17 @@ const createUser = asyncHandler(async (req, res) => {
             user=user.toObject()
             delete user.password
             delete user.refreshToken
-            return res.status(201).json({
-                success: true,
-                message: "User created successfully",
-                data: user
-            })
+            return res.status(201).json(
+                new ApiResponse(201, "User created successfully", user)
+            )
         } catch (error) {
+            console.log(error)
             if (error.statusCode === undefined) {
                 error.statusCode = 500
             }
-            return res.status(error.statusCode).json({
-                success: false,
-                message: error.message,
-                data: error.data,
-                errorcode: error.statusCode,
-                errors: error.errors
-            })
+            return res.status(error.statusCode).json(
+                new ApiError(500, "Unable to create user",[error.message])
+            )
             
         }
 
@@ -52,14 +47,14 @@ const createUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
     try {
         const {username, password} = req.body
+        //console.log(username, password)
         if (!username || !password) {
             throw new ApiError(400, "Please provide all required fields")
         }
         const user=await User.findOne({username})
-        console.log(user)
         if (!user) {
             throw new ApiError(401, "Invalid username or password")
-        }
+        } 
         const isPassCorrect = await user.isPasscorrect(password)
         if (!isPassCorrect) {
             throw new ApiError(401, "Invalid username or password")
@@ -88,22 +83,44 @@ const loginUser = asyncHandler(async (req, res) => {
             error.statusCode = 500
         }
         
-        return res.status(error.statusCode).json({
-            success: false,
-            message: error.message,
-            data: error.data,
-            errorcode: error.statusCode,
-            errors: error.errors
-        })
+        return res.status(error.statusCode).json(
+            new ApiError(error.statusCode, error.message || "Unable to login user", [error.message])
+        )
         
     }
 })
 
+const logoutUser = asyncHandler(async (req, res) => {
+    try {
+        const username = req.user.username
+        const user = await User.findOne({username})
+        if (!user) {
+            throw new ApiError(401, "User not found")
+        }
+        user.refreshToken = null
+        await user.save()
+        res.status(200).clearCookie("refreshToken").
+        clearCookie("accessToken").
+        json(
+            new ApiResponse(200, "Logout successful",
+                {message: "Logout successful"}
+            )
+        )
+        
+    } catch (error) {
+        if (error.statusCode === undefined) {
+            error.statusCode = 500
+        }
+        return res.status(error.statusCode).json(
+            new ApiError(500, "Unable to logout user",error)
+        )
+    }
+});
 
 
 
-export {loginUser, createUser}
+export {loginUser, createUser,logoutUser}
 
 
-    
+
 
