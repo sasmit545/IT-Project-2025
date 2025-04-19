@@ -512,7 +512,7 @@ function Canvas({ components, setComponents, setSelectedElement }) {
   )
 }
 
-function RightPanel({ selectedElement, setComponents, components }) {
+function RightPanel({ selectedElement, setComponents, components, rightSidebarOpen }) {
   const [element, setElement] = useState(selectedElement)
 
   useEffect(() => {
@@ -521,7 +521,7 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
   if (!selectedElement)
     return (
-      <div className="right-panel empty-panel">
+      <div className={`right-panel empty-panel ${rightSidebarOpen ? "open" : "closed"}`}>
         <h3>Style Editor</h3>
         <p>Select an element to edit its properties</p>
       </div>
@@ -575,7 +575,7 @@ function RightPanel({ selectedElement, setComponents, components }) {
   }
 
   return (
-    <div className="right-panel">
+    <div className={`right-panel ${rightSidebarOpen ? "open" : "closed"}`}>
       <h3>Style Editor</h3>
       <div className="element-type">
         <label>
@@ -1084,14 +1084,16 @@ export default function PageBuilder() {
   const [isCodeExportModalOpen, setIsCodeExportModalOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
 
   useEffect(() => {
     // Check if device is mobile
     const checkIfMobile = () => {
       const mobile = window.innerWidth <= 768
       setIsMobile(mobile)
-      if (mobile && sidebarOpen) {
+      if (mobile) {
         setSidebarOpen(false)
+        setRightSidebarOpen(false)
       }
     }
 
@@ -1101,7 +1103,7 @@ export default function PageBuilder() {
     return () => {
       window.removeEventListener("resize", checkIfMobile)
     }
-  }, [sidebarOpen])
+  }, [])
 
   const handleDragEnd = (event) => {
     const { active, over } = event
@@ -1189,6 +1191,10 @@ export default function PageBuilder() {
     setSidebarOpen(!sidebarOpen)
   }
 
+  const toggleRightSidebar = () => {
+    setRightSidebarOpen(!rightSidebarOpen)
+  }
+
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <div className="editor-container">
@@ -1197,6 +1203,9 @@ export default function PageBuilder() {
             {sidebarOpen ? "◀" : "▶"}
           </button>
           <h1>SiteBuilder Editor</h1>
+          <button className="right-sidebar-toggle" onClick={toggleRightSidebar}>
+            {rightSidebarOpen ? "▶" : "◀"}
+          </button>
         </div>
 
         <div className="editor-main">
@@ -1207,7 +1216,12 @@ export default function PageBuilder() {
 
           <Canvas components={components} setComponents={setComponents} setSelectedElement={setSelectedElement} />
 
-          <RightPanel selectedElement={selectedElement} setComponents={setComponents} components={components} />
+          <RightPanel
+            selectedElement={selectedElement}
+            setComponents={setComponents}
+            components={components}
+            rightSidebarOpen={rightSidebarOpen}
+          />
         </div>
 
         <div className="editor-actions">

@@ -15,25 +15,28 @@
 .editor-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0.75rem 1rem;
   background-color: #121212;
   border-bottom: 1px solid #333;
 }
 
-.sidebar-toggle {
+.sidebar-toggle,
+.right-sidebar-toggle {
   background: none;
   border: none;
   color: #fff;
   font-size: 1.25rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
-  margin-right: 1rem;
 }
 
 .editor-header h1 {
   font-size: 1.25rem;
   font-weight: 500;
   margin: 0;
+  flex: 1;
+  text-align: center;
 }
 
 .editor-main {
@@ -154,6 +157,14 @@
   padding: 1rem;
   border-left: 2px solid #333;
   overflow-y: auto;
+  transition: width 0.3s ease;
+}
+
+.right-panel.closed {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  border-left: none;
 }
 
 .empty-panel {
@@ -464,10 +475,11 @@
     z-index: 10;
     background: #1a1a1a;
     width: 250px;
+    transform: translateX(-100%);
   }
 
-  .editor-sidebar.closed {
-    transform: translateX(-100%);
+  .editor-sidebar.open {
+    transform: translateX(0);
   }
 
   .right-panel {
@@ -481,7 +493,7 @@
     transform: translateX(100%);
   }
 
-  .right-panel.active {
+  .right-panel.open {
     transform: translateX(0);
   }
 
