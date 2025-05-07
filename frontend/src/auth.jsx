@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import axios from "axios"
 import "./auth.css"
 
 export default function AuthForm({ onAuthentication }) {
@@ -65,44 +66,90 @@ export default function AuthForm({ onAuthentication }) {
     e.preventDefault()
     setError("")
     setIsLoading(true)
+    const loginUrl = "http://localhost:8000/api/v1/user/login"
+    try {
 
-    // For demo purposes, we'll simulate a successful login
-    setTimeout(() => {
-      // Store mock token and user data
-      localStorage.setItem("userToken", "demo-token-12345")
-      localStorage.setItem("userData", JSON.stringify({ username: loginData.username }))
+        const resp= await axios.post(loginUrl, loginData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        console.log(resp)
+
+        if (resp.status === 200) {
+        console.log(resp.data.message)
+        localStorage.setItem("userRefreshToken", resp.data.message.refreshToken)
+        localStorage.setItem("userAccessToken", resp.data.message.accessToken)
+        localStorage.setItem("userData",resp.data.message.username)
+        localStorage.setItem("userEmail", resp.data.message.email)
 
       onAuthentication(true)
-      navigate("/dashboard")
-      setIsLoading(false)
-    }, 1500)
+       navigate("/dashboard")}
+        
+    } catch (error) {
+      setError("Invalid username or password")
+    }
+    setIsLoading(false)
+    
   }
 
   const handleRegisterSubmit = async (e) => {
+    
     e.preventDefault()
     setError("")
     setIsLoading(true)
+    const registerUrl = "http://localhost:8000/api/v1/user/register"
+    try {
+      const details = await axios.post(registerUrl, registerData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      if (details.status === 201) {
+        console.log(details.data.message)
+        setRegisterData({ username: "", email: "", password: "" })
+        setActiveTab("login")
+        setError("")
+
+        // Show success message
+        const successMessage = document.createElement("div")
+        successMessage.className = "success-message"
+        successMessage.textContent = "Registration successful! Please log in with your credentials."
+        document.querySelector(".auth-card").prepend(successMessage)
+        
+        setTimeout(() => {
+          if (successMessage.parentNode) {
+            successMessage.parentNode.removeChild(successMessage)
+          }
+        }, 5000)
+      }
+
+    } catch (error) {
+      setError("Registration failed. Please try again.")
+      
+    }
+    setIsLoading(false)
 
     // For demo purposes, we'll simulate a successful registration
-    setTimeout(() => {
-      setRegisterData({ username: "", email: "", password: "" })
-      setActiveTab("login")
-      setError("")
+    // setTimeout(() => {
+    //   setRegisterData({ username: "", email: "", password: "" })
+    //   setActiveTab("login")
+    //   setError("")
 
-      // Show success message
-      const successMessage = document.createElement("div")
-      successMessage.className = "success-message"
-      successMessage.textContent = "Registration successful! Please log in with your credentials."
-      document.querySelector(".auth-card").prepend(successMessage)
+    //   // Show success message
+    //   const successMessage = document.createElement("div")
+    //   successMessage.className = "success-message"
+    //   successMessage.textContent = "Registration successful! Please log in with your credentials."
+    //   document.querySelector(".auth-card").prepend(successMessage)
 
-      setTimeout(() => {
-        if (successMessage.parentNode) {
-          successMessage.parentNode.removeChild(successMessage)
-        }
-      }, 5000)
+    //   setTimeout(() => {
+    //     if (successMessage.parentNode) {
+    //       successMessage.parentNode.removeChild(successMessage)
+    //     }
+    //   }, 5000)
 
-      setIsLoading(false)
-    }, 1500)
+    //   setIsLoading(false)
+    // }, 1500)
   }
 
   return (

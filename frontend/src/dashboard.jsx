@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import "./dashboard.css"
+import axios from "axios"
 
 export default function Dashboard() {
   const [userData, setUserData] = useState(null)
@@ -12,51 +13,62 @@ export default function Dashboard() {
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    // Check if user is authenticated
-    const storedUserData = localStorage.getItem("userData")
+useEffect(() => {
+  // Check if user is authenticated
+  const storedUserData = localStorage.getItem("userData");
 
-    if (storedUserData) {
-      setUserData(JSON.parse(storedUserData))
+  if (storedUserData) {
+    try {
+      setUserData(JSON.parse(storedUserData)); // Parse JSON safely
+    } catch (err) {
+      console.error("Invalid user data in localStorage:", err);
+      localStorage.removeItem("userData");
+      navigate("/auth");
     }
+  } else {
+    navigate("/auth");
+  }
 
-    // Check if device is mobile
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
+  // Check if device is mobile
+  const checkIfMobile = () => {
+    setIsMobile(window.innerWidth <= 768);
+  };
 
-    checkIfMobile()
-    window.addEventListener("resize", checkIfMobile)
+  checkIfMobile();
+  window.addEventListener("resize", checkIfMobile);
 
-    // Simulate fetching projects
-    setTimeout(() => {
-      setProjects([
-        {
-          id: 1,
-          name: "Landing Page",
-          lastEdited: "2 days ago",
-          thumbnail: "/placeholder.svg?height=150&width=250",
-        },
-        {
-          id: 2,
-          name: "Portfolio Site",
-          lastEdited: "1 week ago",
-          thumbnail: "/placeholder.svg?height=150&width=250",
-        },
-        {
-          id: 3,
-          name: "Blog Template",
-          lastEdited: "3 weeks ago",
-          thumbnail: "/placeholder.svg?height=150&width=250",
-        },
-      ])
-      setIsLoading(false)
-    }, 1000)
+  // Simulate fetching projects
+  const timeoutId = setTimeout(() => {
+    setProjects([
+      {
+        id: 1,
+        name: "Landing Page",
+        lastEdited: "2 days ago",
+        thumbnail: "/placeholder.svg?height=150&width=250",
+      },
+      {
+        id: 2,
+        name: "Portfolio Site",
+        lastEdited: "1 week ago",
+        thumbnail: "/placeholder.svg?height=150&width=250",
+      },
+      {
+        id: 3,
+        name: "Blog Template",
+        lastEdited: "3 weeks ago",
+        thumbnail: "/placeholder.svg?height=150&width=250",
+      },
+    ]);
+    setIsLoading(false);
+  }, 1000);
 
-    return () => {
-      window.removeEventListener("resize", checkIfMobile)
-    }
-  }, [])
+  // Cleanup on unmount
+  return () => {
+    window.removeEventListener("resize", checkIfMobile);
+    clearTimeout(timeoutId);
+  };
+}, [navigate]);
+
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen)
@@ -78,6 +90,35 @@ export default function Dashboard() {
       </div>
     )
   }
+const logout_user = async () => {
+  try {
+    const userAccessToken = localStorage.getItem("userAccessToken")
+    localStorage.clear()
+    
+    // Dispatch custom event to notify App component about auth state change
+    window.dispatchEvent(new Event('authChange'))
+
+    const logout = await axios.patch(
+      "http://localhost:8000/api/v1/user/logout",
+      {}, // empty request body
+      {
+        headers: {
+          Authorization: `Bearer ${userAccessToken}`,
+        },
+        withCredentials: true, // if using cookies/sessions
+      }
+    );
+
+    console.log("Logout successful:", logout);
+     setUserData(null);
+    navigate("/auth");
+  } catch (error) {
+    console.error("Logout failed:", error);
+    // Ensure navigation happens even if API call fails
+    navigate("/auth");
+  }
+};
+
 
   return (
     <div className="dashboard-container">
@@ -104,7 +145,7 @@ export default function Dashboard() {
               </button>
               <div className={`mobile-menu ${menuOpen ? "open" : ""}`}>
                 <div className="mobile-menu-header">
-                  <div className="avatar">{userData?.username?.charAt(0).toUpperCase() || "U"}</div>
+
                   <span className="username">{userData?.username || "User"}</span>
                   <button className="close-menu" onClick={toggleMenu}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -127,8 +168,8 @@ export default function Dashboard() {
             </>
           ) : (
             <div className="user-menu">
-              <span className="username">{userData?.username || "User"}</span>
-              <div className="avatar">{userData?.username?.charAt(0).toUpperCase() || "U"}</div>
+              <span className="username">{userData || "User"}</span>
+
               <div className="dropdown-menu">
                 <ul>
                   <li>
@@ -138,7 +179,7 @@ export default function Dashboard() {
                     <a href="#settings">Settings</a>
                   </li>
                   <li>
-                    <a href="#logout">Logout</a>
+                    <a href="#logout" onClick={logout_user}>Logout</a>
                   </li>
                 </ul>
               </div>
@@ -149,7 +190,7 @@ export default function Dashboard() {
 
       <main className="dashboard-main">
         <div className="welcome-section">
-          <h1>Welcome back, {userData?.username || "User"}!</h1>
+          <h1>Welcome back, {userData || "User"}!</h1>
           <p>Continue working on your projects or create something new.</p>
         </div>
 

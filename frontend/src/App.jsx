@@ -11,11 +11,25 @@ import "./App.css"
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  // Check if user is authenticated on component mount
+  // Check if user is authenticated on component mount and when localStorage changes
   useEffect(() => {
-    const token = localStorage.getItem("userToken")
-    if (token) {
-      setIsAuthenticated(true)
+    const checkAuthStatus = () => {
+      const token = localStorage.getItem("userAccessToken")
+      setIsAuthenticated(!!token)
+    }
+    
+    // Initial check
+    checkAuthStatus()
+    
+    // Add event listener for storage changes
+    window.addEventListener('storage', checkAuthStatus)
+    
+    // Custom event for internal state changes
+    window.addEventListener('authChange', checkAuthStatus)
+    
+    return () => {
+      window.removeEventListener('storage', checkAuthStatus)
+      window.removeEventListener('authChange', checkAuthStatus)
     }
   }, [])
 
@@ -29,13 +43,6 @@ function App() {
   return (
     <Router>
       <div className="app-container">
-        {isAuthenticated && (
-          <header className="nav-header">
-            <button onClick={handleLogout} className="logout-btn">
-              Logout
-            </button>
-          </header>
-        )}
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route

@@ -8,6 +8,7 @@ import asyncHandler from "../utils/AsyncHandler.utils.js"
 const createUser = asyncHandler(async (req, res) => {
     
         try {
+            console.log("Create user request received")
             const {username, password, email} = req.body
             if (username.trim() === "" || password.trim() === "" || email.trim() === "") {
                 throw new ApiError(400, "Please provide all required fields")
@@ -27,6 +28,7 @@ const createUser = asyncHandler(async (req, res) => {
             user=user.toObject()
             delete user.password
             delete user.refreshToken
+            console.log("hehe")
             return res.status(201).json(
                 new ApiResponse(201, "User created successfully", user)
             )
@@ -46,6 +48,7 @@ const createUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     try {
+        console.log("Login request received")   
         const {username, password} = req.body
         //console.log(username, password)
         if (!username || !password) {
@@ -73,7 +76,9 @@ const loginUser = asyncHandler(async (req, res) => {
         json(
             new ApiResponse(200, "Login successful", 
                 {accessToken,
-                refreshToken
+                refreshToken,
+                username: user.username,
+                email: user.email
                 },     
             )
         )
@@ -92,6 +97,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
 const logoutUser = asyncHandler(async (req, res) => {
     try {
+        console.log("Logout request received")
         const username = req.user.username
         const user = await User.findOne({username})
         if (!user) {
