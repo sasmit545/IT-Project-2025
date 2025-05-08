@@ -2,26 +2,17 @@
 
 import { useState, useEffect } from "react"
 import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core"
+import { X, ChevronDown, ChevronRight } from "lucide-react"
+import { FaTextHeight, FaRegSquare, FaRegImage, FaListUl, FaLink } from "react-icons/fa"
 import "./editor.css"
 
-// Enhanced component list with more options
+
+
+
+// Components definition
 const componentsList = [
-  {
-    id: "text",
-    label: "Text",
-    content: "Edit this text",
-    type: "div",
-    style: {},
-    closing: 1,
-  },
-  {
-    id: "button",
-    label: "Button",
-    content: "ClickMe",
-    type: "button",
-    style: {},
-    closing: 1,
-  },
+  { id: "text", label: "Text", content: "Edit this text", type: "div", style: {}, closing: 1 },
+  { id: "button", label: "Button", content: "ClickMe", type: "button", style: {}, closing: 1 },
   {
     id: "container",
     label: "Container",
@@ -46,7 +37,7 @@ const componentsList = [
     content: "",
     type: "img",
     style: { width: "100%", maxWidth: "300px" },
-    src: "https://via.placeholder.com/300",
+    src: "https://cdn.pixabay.com/photo/2017/11/10/05/24/add-2935429_1280.png",
     alt: "Placeholder image",
     closing: 0,
   },
@@ -63,139 +54,126 @@ const componentsList = [
     label: "Link",
     content: "Click here",
     type: "a",
-    style: { color: "blue", textDecoration: "underline" },
+    style: { color: "#6366f1", textDecoration: "underline" },
     href: "#",
     closing: 1,
   },
-  {
-    id: "input-text",
-    label: "Text Input",
-    content: "Enter text",
-    type: "text",
-    style: {
-      width: "100%",
-      padding: "5px",
-      borderRadius: "4px",
-      border: "1px solid #ccc",
-    },
-    placeholder: "Enter text",
-    closing: 0,
-  },
-  {
-    id: "input-email",
-    label: "Email Input",
-    content: "Enter text",
-    type: "email",
-    style: {
-      width: "100%",
-      padding: "5px",
-      borderRadius: "4px",
-      border: "1px solid #ccc",
-    },
-    placeholder: "Enter text",
-    closing: 0,
-  },
 ]
 
-// Added element categories
+// Icons mapped by component id
+const categoryIcons = {
+  text: <FaTextHeight className="h-5 w-5" />,
+  button: <FaRegSquare className="h-5 w-5" />,
+  container: <FaRegSquare className="h-5 w-5" />,
+  heading: <FaTextHeight className="h-5 w-5" />,
+  image: <FaRegImage className="h-5 w-5" />,
+  list: <FaListUl className="h-5 w-5" />,
+  link: <FaLink className="h-5 w-5" />,
+}
+const componentColors = {
+  text: 'bg-pink-100',
+  heading: 'bg-blue-100',
+  button: 'bg-green-100',
+  container: 'bg-cyan-100',
+  image: 'bg-purple-100',
+  list: 'bg-yellow-100',
+  link: 'bg-teal-100',
+};
+
+
+
+// Categories
 const componentCategories = [
-  {
-    id: "basic",
-    label: "Basic Elements",
-    components: ["text", "heading", "button"],
-  },
+  { id: "basic", label: "Basic Elements", components: ["text", "heading", "button"] },
   { id: "layout", label: "Layout", components: ["container"] },
   { id: "media", label: "Media", components: ["image"] },
   { id: "navigation", label: "Navigation", components: ["link", "list"] },
-  { id: "forms", label: "Forms", components: ["input-text", "input-email"] },
 ]
 
-function DraggableComponent({ id, content }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({ id })
-  const style = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : "none",
-    width: "100px",
-    height: "100px",
-    color: "#fff",
-    backgroundColor: "#1a1a1a",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "grab",
-    transition: "all 0.2s ease",
-  }
+function DraggableComponent({ id, content, icon }) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
+  const style = transform
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+    : {};
 
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      className={`
+        p-4 
+        ${componentColors[id]} 
+        cursor-grab 
+        mb-3 
+        rounded-xl 
+        shadow-sm 
+        border border-violet-200 
+        flex items-center gap-4 
+        transition-all duration-200 ease-in-out 
+        hover:shadow-lg 
+        hover:scale-[1.02] 
+       
+        
+      `}
       style={style}
-      onMouseOver={(e) => {
-        e.currentTarget.style.backgroundColor = "#222222"
-        e.currentTarget.style.transform = "scale(1.02)"
-      }}
-      onMouseOut={(e) => {
-        e.currentTarget.style.backgroundColor = "#1a1a1a"
-        e.currentTarget.style.transform = "scale(1)"
-      }}
     >
-      <span dangerouslySetInnerHTML={{ __html: content }} />
+      {icon && <span className="text-gray-600 text-2xl">{icon}</span>}
+      <span className="text-sm font-medium text-gray-800">{content}</span>
     </div>
-  )
+  );
 }
 
+
+
+// Expandable category list
 function ComponentCategoryList({ categories }) {
   const [expandedCategories, setExpandedCategories] = useState(categories.map((cat) => cat.id))
 
   const toggleCategory = (categoryId) => {
     setExpandedCategories((prev) =>
-      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
     )
   }
 
   return (
-    <div>
+    <div className="space-y-3">
       {categories.map((category) => (
         <div
           key={category.id}
-          style={{
-            marginBottom: "15px",
-            color: "#fff",
-            fontSize: "14px",
-          }}
+          className="overflow-hidden rounded-lg border border-gray-200 shadow-sm"
         >
           <div
             onClick={() => toggleCategory(category.id)}
-            style={{
-              padding: "8px",
-              background: "#1a1a1a",
-              borderBottom: "2px solid #333",
-              cursor: "pointer",
-              borderRadius: "4px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              fontWeight: "bold",
-            }}
+            className={`p-3 bg-gradient-to-r from-slate-50 to-slate-100 cursor-pointer flex justify-between items-center font-medium text-slate-700 hover:bg-violet-100 transition-colors `}
           >
-            {category.label}
-            <span>{expandedCategories.includes(category.id) ? "▼" : "►"}</span>
+            <div className="flex items-center space-x-2">
+              <span>{category.label}</span>
+            </div>
+            <span>
+              {expandedCategories.includes(category.id) ? (
+                <ChevronDown className="h-4 w-4 text-slate-500" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-slate-500" />
+              )}
+            </span>
           </div>
           {expandedCategories.includes(category.id) && (
-            <div
-              style={{
-                marginTop: "5px",
-                display: "flex",
-                flexDirection: "row",
-                flexWrap: "wrap",
-                gap: "8px",
-              }}
-            >
+            <div className="p-2 bg-white ">
               {category.components.map((compId) => {
                 const comp = componentsList.find((c) => c.id === compId)
-                return comp ? <DraggableComponent key={comp.id} id={comp.id} content={comp.label} /> : null
+                return (
+                  comp && (
+                    <DraggableComponent
+                      key={comp.id}
+                      id={comp.id}
+                      content={comp.label}
+                      icon={categoryIcons[comp.id]}
+                    />
+                  )
+                )
               })}
             </div>
           )}
@@ -204,6 +182,7 @@ function ComponentCategoryList({ categories }) {
     </div>
   )
 }
+
 
 function NestedDroppable({ component, componentPath, components, setComponents, setSelectedElement }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -283,15 +262,13 @@ function NestedDroppable({ component, componentPath, components, setComponents, 
 
   const containerStyle = {
     ...component.style,
-    background: isOver ? "rgba(144, 238, 144, 0.3)" : component.style.background || "transparent",
-    position: "relative",
-    transition: "all 0.2s ease",
-    border: component.style.border || (isOver ? "1px dashed #4CAF50" : "1px dashed #ccc"),
   }
 
   return (
     <div
       ref={setNodeRef}
+      className={`relative transition-all duration-200 ${isOver ? "bg-violet-50 border-violet-300" : "border-dashed border-gray-300"
+        } border`}
       style={containerStyle}
       onClick={(e) => {
         e.stopPropagation()
@@ -304,13 +281,13 @@ function NestedDroppable({ component, componentPath, components, setComponents, 
           suppressContentEditableWarning
           onBlur={(e) => updateContent(e.target.innerHTML)}
           dangerouslySetInnerHTML={{ __html: component.content }}
-          style={{ marginBottom: "10px" }}
+          className="mb-2.5"
         />
       )}
 
       {component.children &&
         component.children.map((childComp, childIndex) => (
-          <div key={childIndex} style={{ position: "relative" }}>
+          <div key={childIndex} className="relative">
             <RenderComponent
               component={childComp}
               componentPath={[...componentPath, "children", childIndex]}
@@ -323,31 +300,16 @@ function NestedDroppable({ component, componentPath, components, setComponents, 
                 e.stopPropagation()
                 handleDeleteComponent(childIndex)
               }}
-              style={{
-                position: "absolute",
-                top: "5px",
-                right: "5px",
-                background: "red",
-                color: "white",
-                border: "none",
-                borderRadius: "50%",
-                width: "20px",
-                height: "20px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                fontSize: "12px",
-                opacity: "0.8",
-              }}
+              className="absolute top-1 right-1 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center cursor-pointer text-xs opacity-80 hover:opacity-100"
+              aria-label="Delete component"
             >
-              ×
+              <X className="h-3 w-3" />
             </button>
           </div>
         ))}
 
       {component.isContainer && component.children.length === 0 && (
-        <div style={{ textAlign: "center", padding: "20px", color: "#999" }}>Drop components here</div>
+        <div className="text-center py-5 text-slate-500">Drop components here</div>
       )}
     </div>
   )
@@ -399,7 +361,7 @@ function RenderComponent({ component, componentPath, components, setComponents, 
 
   // Handle special component types
   if (ComponentType === "img") {
-    return <img src={component.src || "https://via.placeholder.com/300"} alt={component.alt || "Image"} {...props} />
+    return <img src={component.src || "https://cdn.pixabay.com/photo/2017/11/10/05/24/add-2935429_1280.png"} alt={component.alt || "Image"} {...props} />
   } else if (ComponentType === "a") {
     return (
       <a
@@ -473,40 +435,61 @@ function Canvas({ components, setComponents, setSelectedElement }) {
   }
 
   return (
-    <div className="canvas-container">
-      <div className="canvas-toolbar">
+    <div className="w-3/5 flex flex-col">
+      <div className="p-3 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 flex gap-2 
+      items-center shadow-sm">
         <button
           onClick={handleUndo}
           disabled={historyStack.length <= 1}
-          className={`toolbar-button ${historyStack.length <= 1 ? "disabled" : ""}`}
+          className={`px-4 py-2 rounded-md font-medium transition-colors ${historyStack.length <= 1
+            ? "opacity-50 cursor-not-allowed bg-slate-200 text-slate-500"
+            : "bg-blue-300 hover:bg-blue-700 hover:text-white text-slate-800 shadow-sm border border-slate-200"
+            }`}
         >
           Undo
         </button>
         <button
           onClick={handleRedo}
           disabled={futureStack.length === 0}
-          className={`toolbar-button ${futureStack.length === 0 ? "disabled" : ""}`}
+          className={`px-4 py-2 rounded-md font-medium transition-colors ${futureStack.length === 0
+            ? "opacity-50 cursor-not-allowed bg-slate-200 text-slate-500"
+            : "bg-emerald-300 hover:bg-emerald-700 hover:text-white text-slate-900 shadow-sm border border-slate-200"
+            }`}
         >
           Redo
         </button>
       </div>
 
-      <div ref={setNodeRef} className={`canvas-area ${isOver ? "drop-active" : ""}`}>
-        {components.length === 0 ? <p className="canvas-placeholder">Drag elements here</p> : null}
-        {components.map((comp, index) => (
-          <div key={index} className="canvas-item">
-            <RenderComponent
-              component={comp}
-              componentPath={[index]}
-              components={components}
-              setComponents={setComponents}
-              setSelectedElement={setSelectedElement}
-            />
-            <button onClick={() => handleDeleteComponent(index)} className="delete-button">
-              ×
-            </button>
+      <div
+        ref={setNodeRef}
+        className={`min-h-[400px] border-2 border-dashed ${isOver ? "border-violet-400 bg-violet-100" : "border-slate-300 bg-slate-50"
+          } p-4 flex flex-col gap-3 overflow-auto flex-1 relative transition-colors duration-200`}
+      >
+        {components.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-slate-400">
+            <p className="text-lg">Drag elements here to start building</p>
+            <p className="text-sm mt-2">Select components from the left panel</p>
           </div>
-        ))}
+        ) : (
+          components.map((comp, index) => (
+            <div key={index} className="relative my-2 group">
+              <RenderComponent
+                component={comp}
+                componentPath={[index]}
+                components={components}
+                setComponents={setComponents}
+                setSelectedElement={setSelectedElement}
+              />
+              <button
+                onClick={() => handleDeleteComponent(index)}
+                className="absolute top-1 right-1 bg-rose-500 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-600"
+                aria-label="Delete component"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))
+        )}
       </div>
     </div>
   )
@@ -521,9 +504,16 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
   if (!selectedElement)
     return (
-      <div className="right-panel empty-panel">
-        <h3>Style Editor</h3>
-        <p>Select an element to edit its properties</p>
+      <div className="w-1/5 p-4 border-l border-slate-200 bg-slate-50">
+        <div className="text-center py-8">
+          <h3 className="text-lg font-medium text-slate-700 mb-2">Style Editor</h3>
+          <p className="text-slate-500 text-sm">Select an element to edit its properties</p>
+          <div className="mt-6 p-4 border border-dashed border-slate-300 rounded-lg">
+            <p className="text-slate-400 text-xs">
+              Click on any element in the canvas to customize its appearance and behavior
+            </p>
+          </div>
+        </div>
       </div>
     )
 
@@ -574,332 +564,1195 @@ function RightPanel({ selectedElement, setComponents, components }) {
     setElement({ ...element, [attribute]: value }) // Update local state
   }
 
+  // Function to update multiple style properties at once
+  const updateMultipleStyles = (styleObject) => {
+    Object.entries(styleObject).forEach(([property, value]) => {
+      updateStyle(property, value);
+    });
+  }
+
   return (
-    <div className="right-panel">
-      <h3>Style Editor</h3>
-      <div className="element-type">
-        <label>
-          Element Type: <span>{element?.type}</span>
-        </label>
-      </div>
-
-      <div className="style-section">
-        <h4>Text Styles</h4>
-        <div className="style-control">
-          <label>Text Color: </label>
-          <input
-            type="color"
-            onChange={(e) => updateStyle("color", e.target.value)}
-            value={element?.style?.color || "#000000"}
-          />
-        </div>
-
-        <div className="style-control">
-          <label>Font Size: </label>
-          <div className="range-control">
-            <input
-              type="range"
-              min="8"
-              max="72"
-              onChange={(e) => updateStyle("fontSize", `${e.target.value}px`)}
-              value={Number.parseInt(element?.style?.fontSize) || 16}
-            />
-            <span className="range-value">{Number.parseInt(element?.style?.fontSize) || 16}px</span>
-          </div>
-        </div>
-
-        <div className="style-control">
-          <label>Font Weight: </label>
-          <select
-            onChange={(e) => updateStyle("fontWeight", e.target.value)}
-            value={element?.style?.fontWeight || "normal"}
-          >
-            <option value="normal">Normal</option>
-            <option value="bold">Bold</option>
-            <option value="lighter">Lighter</option>
-          </select>
+    <div className="w-1/5 p-4 border-l border-slate-200 bg-slate-50 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
+        <h3 className="text-lg font-medium text-slate-800 mb-2">Element Properties</h3>
+        <div className="p-2 bg-slate-50 rounded-md border border-slate-200">
+          <label className="font-medium text-slate-700 block mb-1">
+            Type: <span className="font-normal text-slate-500">{element?.type}</span>
+          </label>
         </div>
       </div>
 
-      <div className="style-control">
-        <label>Text Align: </label>
-        <div className="button-group">
-          <button
-            onClick={() => updateStyle("textAlign", "left")}
-            className={element?.style?.textAlign === "left" ? "active" : ""}
-          >
-            Left
-          </button>
-          <button
-            onClick={() => updateStyle("textAlign", "center")}
-            className={element?.style?.textAlign === "center" ? "active" : ""}
-          >
-            Center
-          </button>
-          <button
-            onClick={() => updateStyle("textAlign", "right")}
-            className={element?.style?.textAlign === "right" ? "active" : ""}
-          >
-            Right
-          </button>
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
+        <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Text Styles</h4>
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Text Color: </label>
+            <input
+              type="color"
+              onChange={(e) => updateStyle("color", e.target.value)}
+              value={element?.style?.color || "#000000"}
+              className="w-full h-8 rounded-md border border-slate-900 shadow-sm cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Font Size: </label>
+            <div className="flex items-center">
+              <input
+                type="range"
+                min="8"
+                max="72"
+                onChange={(e) => updateStyle("fontSize", `${e.target.value}px`)}
+                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+              />
+
+              <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                {Number.parseInt(element?.style?.fontSize) || 16}px
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Font Weight: </label>
+            <select
+              onChange={(e) => updateStyle("fontWeight", e.target.value)}
+              value={element?.style?.fontWeight || "normal"}
+              className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+            >
+              <option value="normal">Normal</option>
+              <option value="bold">Bold</option>
+              <option value="lighter">Lighter</option>
+              <option value="100">Thin (100)</option>
+              <option value="300">Light (300)</option>
+              <option value="500">Medium (500)</option>
+              <option value="600">Semibold (600)</option>
+              <option value="800">Extra Bold (800)</option>
+              <option value="900">Black (900)</option>
+            </select>
+          </div>
+
+          {/* NEW: Font Family */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Font Family: </label>
+            <select
+              onChange={(e) => updateStyle("fontFamily", e.target.value)}
+              value={element?.style?.fontFamily || "inherit"}
+              className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+            >
+              <option value="inherit">Default</option>
+              <option value="'Arial', sans-serif">Arial</option>
+              <option value="'Helvetica', sans-serif">Helvetica</option>
+              <option value="'Georgia', serif">Georgia</option>
+              <option value="'Times New Roman', serif">Times New Roman</option>
+              <option value="'Courier New', monospace">Courier New</option>
+              <option value="'Verdana', sans-serif">Verdana</option>
+              <option value="'Roboto', sans-serif">Roboto</option>
+              <option value="'Open Sans', sans-serif">Open Sans</option>
+              <option value="'Montserrat', sans-serif">Montserrat</option>
+            </select>
+          </div>
+
+          {/* NEW: Text Transform */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Text Transform: </label>
+            <select
+              onChange={(e) => updateStyle("textTransform", e.target.value)}
+              value={element?.style?.textTransform || "none"}
+              className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+            >
+              <option value="none">None</option>
+              <option value="uppercase">UPPERCASE</option>
+              <option value="lowercase">lowercase</option>
+              <option value="capitalize">Capitalize</option>
+            </select>
+          </div>
+
+          {/* NEW: Line Height */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Line Height: </label>
+            <div className="flex items-center">
+              <input
+                type="range"
+                min="100"
+                max="300"
+                step="10"
+                onChange={(e) => updateStyle("lineHeight", `${e.target.value}%`)}
+                value={Number.parseInt(element?.style?.lineHeight) || 150}
+                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+              />
+              <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                {Number.parseInt(element?.style?.lineHeight) || 150}%
+              </span>
+            </div>
+          </div>
+
+          {/* NEW: Letter Spacing */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Letter Spacing: </label>
+            <div className="flex items-center">
+              <input
+                type="range"
+                min="-3"
+                max="10"
+                step="0.5"
+                onChange={(e) => updateStyle("letterSpacing", `${e.target.value}px`)}
+                value={Number.parseFloat(element?.style?.letterSpacing) || 0}
+                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+              />
+              <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                {Number.parseFloat(element?.style?.letterSpacing) || 0}px
+              </span>
+            </div>
+          </div>
+
+          {/* NEW: Text Decoration */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Text Decoration: </label>
+            <select
+              onChange={(e) => updateStyle("textDecoration", e.target.value)}
+              value={element?.style?.textDecoration || "none"}
+              className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+            >
+              <option value="none">None</option>
+              <option value="underline">Underline</option>
+              <option value="overline">Overline</option>
+              <option value="line-through">Strikethrough</option>
+            </select>
+          </div>
+
+          {/* NEW: Text Shadow */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Text Shadow: </label>
+            <select
+              onChange={(e) => updateStyle("textShadow", e.target.value)}
+              value={element?.style?.textShadow || "none"}
+              className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+            >
+              <option value="none">None</option>
+              <option value="1px 1px 2px rgba(0,0,0,0.3)">Light</option>
+              <option value="2px 2px 4px rgba(0,0,0,0.4)">Medium</option>
+              <option value="3px 3px 6px rgba(0,0,0,0.5)">Heavy</option>
+              <option value="0px 0px 8px rgba(0,0,0,0.5)">Glow</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <div className="style-control">
-        <label>Display Type:</label>
-        <div className="button-group">
-          <button
-            onClick={() => updateStyle("display", "block")}
-            className={element?.style?.display === "block" ? "active" : ""}
-          >
-            Block
-          </button>
-          <button
-            onClick={() => updateStyle("display", "inline")}
-            className={element?.style?.display === "inline" ? "active" : ""}
-          >
-            Inline
-          </button>
-          <button
-            onClick={() => updateStyle("display", "flex")}
-            className={element?.style?.display === "flex" ? "active" : ""}
-          >
-            Flex
-          </button>
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
+        <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Layout</h4>
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Text Align: </label>
+            <div className="grid grid-cols-3 gap-1">
+              <button
+                onClick={() => updateStyle("textAlign", "left")}
+                className={`p-2 border ${element?.style?.textAlign === "left"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
+              >
+                Left
+              </button>
+              <button
+                onClick={() => updateStyle("textAlign", "center")}
+                className={`p-2 border ${element?.style?.textAlign === "center"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
+              >
+                Center
+              </button>
+              <button
+                onClick={() => updateStyle("textAlign", "right")}
+                className={`p-2 border ${element?.style?.textAlign === "right"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
+              >
+                Right
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Display Type:</label>
+            <div className="grid grid-cols-3 gap-1">
+              <button
+                onClick={() => updateStyle("display", "block")}
+                className={`p-2 border ${element?.style?.display === "block"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
+              >
+                Block
+              </button>
+              <button
+                onClick={() => updateStyle("display", "inline")}
+                className={`p-2 border ${element?.style?.display === "inline"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
+              >
+                Inline
+              </button>
+              <button
+                onClick={() => updateStyle("display", "flex")}
+                className={`p-2 border ${element?.style?.display === "flex"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
+              >
+                Flex
+              </button>
+            </div>
+          </div>
+
+          {/* Show Flex direction when display is Flex */}
+          {element?.style?.display === "flex" && (
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Flex Direction:</label>
+              <div className="grid grid-cols-2 gap-1">
+                <button
+                  onClick={() => updateStyle("flexDirection", "row")}
+                  className={`p-2 border ${element?.style?.flexDirection === "row" || !element?.style?.flexDirection
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
+                >
+                  Row
+                </button>
+                <button
+                  onClick={() => updateStyle("flexDirection", "column")}
+                  className={`p-2 border ${element?.style?.flexDirection === "column"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
+                >
+                  Column
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Show Justify Content options only when display is Flex */}
+          {element?.style?.display === "flex" && (
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Justify Content:</label>
+              <div className="grid grid-cols-2 gap-1">
+                <button
+                  onClick={() => updateStyle("justifyContent", "flex-start")}
+                  className={`p-2 border ${element?.style?.justifyContent === "flex-start"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
+                >
+                  Start
+                </button>
+                <button
+                  onClick={() => updateStyle("justifyContent", "center")}
+                  className={`p-2 border ${element?.style?.justifyContent === "center"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
+                >
+                  Center
+                </button>
+                <button
+                  onClick={() => updateStyle("justifyContent", "flex-end")}
+                  className={`p-2 border ${element?.style?.justifyContent === "flex-end"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
+                >
+                  End
+                </button>
+                <button
+                  onClick={() => updateStyle("justifyContent", "space-between")}
+                  className={`p-2 border ${element?.style?.justifyContent === "space-between"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
+                >
+                  Space Between
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* NEW: Align Items options when display is Flex */}
+          {element?.style?.display === "flex" && (
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Align Items:</label>
+              <div className="grid grid-cols-2 gap-1">
+                <button
+                  onClick={() => updateStyle("alignItems", "flex-start")}
+                  className={`p-2 border ${element?.style?.alignItems === "flex-start"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
+                >
+                  Start
+                </button>
+                <button
+                  onClick={() => updateStyle("alignItems", "center")}
+                  className={`p-2 border ${element?.style?.alignItems === "center"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
+                >
+                  Center
+                </button>
+                <button
+                  onClick={() => updateStyle("alignItems", "flex-end")}
+                  className={`p-2 border ${element?.style?.alignItems === "flex-end"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
+                >
+                  End
+                </button>
+                <button
+                  onClick={() => updateStyle("alignItems", "stretch")}
+                  className={`p-2 border ${element?.style?.alignItems === "stretch"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
+                >
+                  Stretch
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* NEW: Gap for Flex containers */}
+          {element?.style?.display === "flex" && (
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Gap: </label>
+              <div className="flex items-center">
+                <input
+                  type="range"
+                  min="0"
+                  max="50"
+                  onChange={(e) => updateStyle("gap", `${e.target.value}px`)}
+                  value={Number.parseInt(element?.style?.gap) || 0}
+                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                />
+                <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                  {Number.parseInt(element?.style?.gap) || 0}px
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* NEW: Position */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Position: </label>
+            <select
+              onChange={(e) => updateStyle("position", e.target.value)}
+              value={element?.style?.position || "static"}
+              className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+            >
+              <option value="static">Static</option>
+              <option value="relative">Relative</option>
+              <option value="absolute">Absolute</option>
+              <option value="fixed">Fixed</option>
+              <option value="sticky">Sticky</option>
+            </select>
+          </div>
+
+          {/* Show positioning options when position is not static */}
+          {element?.style?.position && element?.style?.position !== "static" && (
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block mb-1 text-sm font-medium text-slate-700">Top: </label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("marginBottom", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.marginBottom) || 0}
+                    className="w-full p-1 border border-slate-300 rounded text-sm"
+                    style={{
+                      backgroundColor: "#f5f3ff",
+                        }}
+                  />
+
+
+                  
+
+                  <span className="ml-1 bg-violet-100 p-2 rounded">px</span>
+                </div>
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium text-slate-700">Left: </label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    onChange={(e) => updateStyle("left", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.left) || 0}
+                    className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+                    style={{
+                      backgroundColor: "#f5f3ff",
+                        }}
+                  />
+                  <span className="ml-1 bg-violet-100 p-2 rounded">px</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* NEW: Z-Index */}
+          {element?.style?.position && element?.style?.position !== "static" && (
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Z-Index: </label>
+              <div className="flex items-center">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  onChange={(e) => updateStyle("zIndex", e.target.value)}
+                  value={Number.parseInt(element?.style?.zIndex) || 0}
+                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                />
+                <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                  {Number.parseInt(element?.style?.zIndex) || 0}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {element?.style?.display === "flex" && (
-        <div className="style-control">
-          <label>Justify Content:</label>
-          <div className="button-grid">
-            <button
-              onClick={() => updateStyle("justifyContent", "flex-start")}
-              className={element?.style?.justifyContent === "flex-start" ? "active" : ""}
-            >
-              Left
-            </button>
-            <button
-              onClick={() => updateStyle("justifyContent", "center")}
-              className={element?.style?.justifyContent === "center" ? "active" : ""}
-            >
-              Center
-            </button>
-            <button
-              onClick={() => updateStyle("justifyContent", "flex-end")}
-              className={element?.style?.justifyContent === "flex-end" ? "active" : ""}
-            >
-              Right
-            </button>
-            <button
-              onClick={() => updateStyle("justifyContent", "space-between")}
-              className={element?.style?.justifyContent === "space-between" ? "active" : ""}
-            >
-              Space Between
-            </button>
-            <button
-              onClick={() => updateStyle("justifyContent", "space-around")}
-              className={element?.style?.justifyContent === "space-around" ? "active" : ""}
-            >
-              Space Around
-            </button>
-            <button
-              onClick={() => updateStyle("justifyContent", "space-evenly")}
-              className={element?.style?.justifyContent === "space-evenly" ? "active" : ""}
-            >
-              Space Evenly
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="style-section">
-        <h4>Box Styles</h4>
-        <div className="style-control">
-          <label>Background: </label>
-          <input
-            type="color"
-            onChange={(e) => updateStyle("background", e.target.value)}
-            value={element?.style?.background || "#FFFFFF"}
-          />
-        </div>
-
-        <div className="style-control">
-          <label>Padding: </label>
-          <div className="range-control">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
+        <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Box Styles</h4>
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Background: </label>
             <input
-              type="range"
-              min="0"
-              max="50"
-              onChange={(e) => updateStyle("padding", `${e.target.value}px`)}
-              value={Number.parseInt(element?.style?.padding) || 0}
+              type="color"
+              onChange={(e) => updateStyle("background", e.target.value)}
+              value={element?.style?.background || "#FFFFFF"}
+              className="w-full h-8 rounded-md border border-slate-900 shadow-sm cursor-pointer"
             />
-            <span className="range-value">{Number.parseInt(element?.style?.padding) || 0}px</span>
           </div>
-        </div>
 
-        <div className="style-control">
-          <label>Margin: </label>
-          <div className="range-control">
+          {/* NEW: Background Opacity */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Background Opacity: </label>
+            <div className="flex items-center">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                onChange={(e) => {
+                  const opacity = e.target.value / 100;
+                  let bgColor = element?.style?.background || "#FFFFFF";
+
+                  // Check if background is already in rgba format
+                  if (bgColor.startsWith('rgba')) {
+                    // Replace the opacity value in the rgba string
+                    bgColor = bgColor.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/,
+                      `rgba($1, $2, $3, ${opacity})`);
+                  }
+                  // Check if background is in hex format
+                  else if (bgColor.startsWith('#')) {
+                    // Convert hex to rgba
+                    const r = parseInt(bgColor.slice(1, 3), 16);
+                    const g = parseInt(bgColor.slice(3, 5), 16);
+                    const b = parseInt(bgColor.slice(5, 7), 16);
+                    bgColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                  }
+
+                  updateStyle("background", bgColor);
+                }}
+                value={(element?.style?.background?.startsWith('rgba') ?
+                  parseFloat(element.style.background.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/)[4]) * 100 :
+                  100)}
+                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+              />
+              <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                {element?.style?.background?.startsWith('rgba') ?
+                  Math.round(parseFloat(element.style.background.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/)[4]) * 100) :
+                  100}%
+              </span>
+            </div>
+          </div>
+
+          {/* NEW: Background Image */}
+          {/* <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Background Image URL: </label>
             <input
-              type="range"
-              min="0"
-              max="50"
-              onChange={(e) => updateStyle("margin", `${e.target.value}px`)}
-              value={Number.parseInt(element?.style?.margin) || 0}
+              type="text"
+              placeholder="https://example.com/image.jpg"
+              onChange={(e) => updateStyle("backgroundImage", e.target.value ? `url(${e.target.value})` : 'none')}
+              value={element?.style?.backgroundImage?.replace(/url\(['"]?(.*?)['"]?\)/i, '$1') || ''}
+              className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
             />
-            <span className="range-value">{Number.parseInt(element?.style?.margin) || 0}px</span>
-          </div>
-        </div>
+          </div> */}
 
-        <div className="style-control">
-          <label>Border Radius: </label>
-          <div className="range-control">
+          {/* NEW: Background Position */}
+          {element?.style?.backgroundImage && element?.style?.backgroundImage !== 'none' && (
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Background Position: </label>
+              <select
+                onChange={(e) => updateStyle("backgroundPosition", e.target.value)}
+                value={element?.style?.backgroundPosition || "center"}
+                className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+              >
+                <option value="center">Center</option>
+                <option value="top">Top</option>
+                <option value="bottom">Bottom</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+                <option value="top left">Top Left</option>
+                <option value="top right">Top Right</option>
+                <option value="bottom left">Bottom Left</option>
+                <option value="bottom right">Bottom Right</option>
+              </select>
+            </div>
+          )}
+
+          {/* NEW: Background Size */}
+          {element?.style?.backgroundImage && element?.style?.backgroundImage !== 'none' && (
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Background Size: </label>
+              <select
+                onChange={(e) => updateStyle("backgroundSize", e.target.value)}
+                value={element?.style?.backgroundSize || "cover"}
+                className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+              >
+                <option value="cover">Cover</option>
+                <option value="contain">Contain</option>
+                <option value="100%">100%</option>
+                <option value="auto">Auto</option>
+              </select>
+            </div>
+          )}
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Padding: </label>
+            <div className="flex items-center">
+              <input
+                type="range"
+                min="0"
+                max="50"
+                onChange={(e) => updateStyle("padding", `${e.target.value}px`)}
+                value={Number.parseInt(element?.style?.padding) || 0}
+                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+
+              />
+              <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                {Number.parseInt(element?.style?.padding) || 0}px
+              </span>
+            </div>
+          </div>
+
+          {/* NEW: Individual Padding Controls */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Padding (Individual): </label>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Top:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("paddingTop", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.paddingTop) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
+                  />
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Right:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("paddingRight", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.paddingRight) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
+                  />
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Bottom:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("paddingBottom", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.paddingBottom) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
+                  />
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Left:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("paddingLeft", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.paddingLeft) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
+                  />
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Margin: </label>
+            <div className="flex items-center">
+              <input
+                type="range"
+                min="0"
+                max="50"
+                onChange={(e) => updateStyle("margin", `${e.target.value}px`)}
+                value={Number.parseInt(element?.style?.margin) || 0}
+                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+
+              />
+              <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                {Number.parseInt(element?.style?.margin) || 0}px
+              </span>
+            </div>
+          </div>
+
+          {/* NEW: Individual Margin Controls */}
+          <div>
+            <label className="block mb-1  font-medium text-slate-700">Margin (Individual): </label>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Top:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("marginTop", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.marginTop) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-red-500 text-sm"
+                    style={{
+                      backgroundColor: "#f5f3ff",
+                        }}
+                  />
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Right:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("marginRight", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.marginRight) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
+                    style={{
+                      backgroundColor: "#f5f3ff",
+                        }}   
+                  />
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Bottom:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("marginBottom", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.marginBottom) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-black text-white text-sm"
+                    style={{
+                      backgroundColor: "#f5f3ff",
+                        }}
+                  />
+
+
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Left:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("marginLeft", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.marginLeft) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
+                    style={{
+                      backgroundColor: "#f5f3ff",
+                        }}
+                  />
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Border Radius: </label>
+            <div className="flex items-center">
+              <input
+                type="range"
+                min="0"
+                max="50"
+                onChange={(e) => updateStyle("borderRadius", `${e.target.value}px`)}
+                value={Number.parseInt(element?.style?.borderRadius) || 0}
+                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                       
+              />
+              <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                {Number.parseInt(element?.style?.borderRadius) || 0}px
+              </span>
+            </div>
+          </div>
+
+          {/* NEW: Individual Border Radius Controls */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Border Radius (Individual): </label>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Top Left:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("borderTopLeftRadius", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.borderTopLeftRadius) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
+                    style={{
+                      backgroundColor: "#f5f3ff",
+                        }}
+                  />
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Top Right:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("borderTopRightRadius", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.borderTopRightRadius) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
+                    style={{
+                      backgroundColor: "#f5f3ff",
+                        }}
+                  />
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Bottom Left:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("borderBottomLeftRadius", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.borderBottomLeftRadius) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
+                    style={{
+                      backgroundColor: "#f5f3ff",
+                        }}
+                  />
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+              <div>
+                <label className="block mb-1 text-xs text-slate-600">Bottom Right:</label>
+                <div className="flex">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("borderBottomRightRadius", `${e.target.value}px`)}
+                    value={Number.parseInt(element?.style?.borderBottomRightRadius) || 0}
+                    className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
+                    style={{
+                      backgroundColor: "#f5f3ff",
+                        }}
+                  />
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Border: </label>
+            <select
+              onChange={(e) => updateStyle("border", e.target.value)}
+              value={element?.style?.border || "none"}
+              className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+            >
+              <option value="none">None</option>
+              <option value="1px solid black">Thin</option>
+              <option value="2px solid black">Medium</option>
+              <option value="3px solid black">Thick</option>
+              <option value="1px dashed #ccc">Dashed</option>
+              <option value="1px dotted #ccc">Dotted</option>
+            </select>
+          </div>
+
+          {/* NEW: Border Color */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Border Color: </label>
             <input
-              type="range"
-              min="0"
-              max="50"
-              onChange={(e) => updateStyle("borderRadius", `${e.target.value}px`)}
-              value={Number.parseInt(element?.style?.borderRadius) || 0}
+              type="color"
+              onChange={(e) => {
+                // If there's already a border, replace its color
+                if (element?.style?.border && element?.style?.border !== "none") {
+                  const borderParts = element.style.border.split(' ');
+                  if (borderParts.length >= 3) {
+                    borderParts[2] = e.target.value;
+                    updateStyle("border", borderParts.join(' '));
+                  } else {
+                    // If border format is unexpected, just set new border with the color
+                    updateStyle("border", `1px solid ${e.target.value}`);
+                  }
+                } else {
+                  // No existing border, create a new one
+                  updateStyle("border", `1px solid ${e.target.value}`);
+                }
+              }}
+              value={element?.style?.border?.split(' ')[2] || "#000000"}
+              className="w-full h-8 rounded-md border border-slate-900 shadow-sm cursor-pointer"
             />
-            <span className="range-value">{Number.parseInt(element?.style?.borderRadius) || 0}px</span>
           </div>
-        </div>
 
-        <div className="style-control">
-          <label>Border: </label>
-          <select onChange={(e) => updateStyle("border", e.target.value)} value={element?.style?.border || "none"}>
-            <option value="none">None</option>
-            <option value="1px solid black">Thin</option>
-            <option value="2px solid black">Medium</option>
-            <option value="3px solid black">Thick</option>
-            <option value="1px dashed #ccc">Dashed</option>
-            <option value="1px dotted #ccc">Dotted</option>
-          </select>
+          {/* NEW: Box Shadow */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Box Shadow: </label>
+            <select
+              onChange={(e) => updateStyle("boxShadow", e.target.value)}
+              value={element?.style?.boxShadow || "none"}
+              className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+            >
+              <option value="none">None</option>
+              <option value="0 1px 3px rgba(0,0,0,0.12)">Light</option>
+              <option value="0 4px 6px rgba(0,0,0,0.1)">Medium</option>
+              <option value="0 10px 15px -3px rgba(0,0,0,0.1)">Large</option>
+              <option value="0 20px 25px -5px rgba(0,0,0,0.1)">Extra Large</option>
+              <option value="0 0 15px rgba(0,0,0,0.1)">Soft Glow</option>
+              <option value="rgba(0, 0, 0, 0.16) 0px 1px 4px, rgba(0, 0, 0, 0.1) 0px 0px 0px 3px">Outline</option>
+              <option value="rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px">Layered</option>
+              <option value="rgba(0, 0, 0, 0.07) 0px 1px 2px, rgba(0, 0, 0, 0.07) 0px 2px 4px, rgba(0, 0, 0, 0.07) 0px 4px 8px, rgba(0, 0, 0, 0.07) 0px 8px 16px">Stacked</option>
+            </select>
+          </div>
+
+          {/* NEW: Opacity */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Opacity: </label>
+            <div className="flex items-center">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                onChange={(e) => updateStyle("opacity", e.target.value / 100)}
+                value={(element?.style?.opacity || 1) * 100}
+                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+              />
+              <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                {Math.round((element?.style?.opacity || 1) * 100)}%
+              </span>
+            </div>
+          </div>
+
+          {/* NEW: Overflow */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Overflow: </label>
+            <select
+              onChange={(e) => updateStyle("overflow", e.target.value)}
+              value={element?.style?.overflow || "visible"}
+              className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+            >
+              <option value="visible">Visible</option>
+              <option value="hidden">Hidden</option>
+              <option value="scroll">Scroll</option>
+              <option value="auto">Auto</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {element?.type === "a" && (
-        <div className="style-section">
-          <h4>Link Settings</h4>
-          <div className="style-control">
-            <label>URL: </label>
-            <input type="text" onChange={(e) => updateAttribute("href", e.target.value)} value={element?.href || "#"} />
-          </div>
-          <div className="style-control">
-            <label>Opens in: </label>
-            <select onChange={(e) => updateAttribute("target", e.target.value)} value={element?.target || "_self"}>
-              <option value="_self">Same Window</option>
-              <option value="_blank">New Window</option>
-            </select>
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
+          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Link Settings</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">URL: </label>
+              <input
+                type="text"
+                onChange={(e) => updateAttribute("href", e.target.value)}
+                value={element?.href || "#"}
+                className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Opens in: </label>
+              <select
+                onChange={(e) => updateAttribute("target", e.target.value)}
+                value={element?.target || "_self"}
+                className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+              >
+                <option value="_self">Same Window</option>
+                <option value="_blank">New Window</option>
+              </select>
+            </div>
           </div>
         </div>
       )}
 
       {element?.type === "img" && (
-        <div className="style-section">
-          <h4>Image Settings</h4>
-          <div className="style-control">
-            <label>Image URL: </label>
-            <input type="text" onChange={(e) => updateAttribute("src", e.target.value)} value={element?.src || ""} />
-          </div>
-          <div className="style-control">
-            <label>Alt Text: </label>
-            <input type="text" onChange={(e) => updateAttribute("alt", e.target.value)} value={element?.alt || ""} />
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
+          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Image Settings</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Image URL: </label>
+              <input
+                type="text"
+                onChange={(e) => updateAttribute("src", e.target.value)}
+                value={element?.src || ""}
+                className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Alt Text: </label>
+              <input
+                type="text"
+                onChange={(e) => updateAttribute("alt", e.target.value)}
+                value={element?.alt || ""}
+                className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+              />
+            </div>
+
+            {/* NEW: Object Fit */}
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Object Fit: </label>
+              <select
+                onChange={(e) => updateStyle("objectFit", e.target.value)}
+                value={element?.style?.objectFit || "fill"}
+                className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+              >
+                <option value="fill">Fill</option>
+                <option value="contain">Contain</option>
+                <option value="cover">Cover</option>
+                <option value="none">None</option>
+                <option value="scale-down">Scale Down</option>
+              </select>
+            </div>
+
+            {/* NEW: Object Position */}
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Object Position: </label>
+              <select
+                onChange={(e) => updateStyle("objectPosition", e.target.value)}
+                value={element?.style?.objectPosition || "center"}
+                className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+              >
+                <option value="center">Center</option>
+                <option value="top">Top</option>
+                <option value="bottom">Bottom</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+                <option value="top left">Top Left</option>
+                <option value="top right">Top Right</option>
+                <option value="bottom left">Bottom Left</option>
+                <option value="bottom right">Bottom Right</option>
+              </select>
+            </div>
           </div>
         </div>
       )}
 
       {element?.isContainer && (
-        <div className="style-section">
-          <h4>Container Settings</h4>
-          <div className="style-control">
-            <label>Width: </label>
-            <div className="range-control">
-              <input
-                type="range"
-                min="10"
-                max="100"
-                onChange={(e) => updateStyle("width", `${e.target.value}%`)}
-                value={Number.parseInt(element?.style?.width) || 100}
-              />
-              <span className="range-value">{Number.parseInt(element?.style?.width) || 100}%</span>
-            </div>
-          </div>
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
+          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Container Settings</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Width: </label>
+              <div className="flex items-center">
+                <input
+                  type="range"
+                  min="10"
+                  max="100"
+                  onChange={(e) => updateStyle("width", `${e.target.value}%`)}
+                  value={Number.parseInt(element?.style?.width) || 100}
+                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
 
-          <div className="style-control">
-            <label>Min Height: </label>
-            <div className="range-control">
-              <inputt
-                type="range"
-                min="50"
-                max="500"
-                onChange={(e) => updateStyle("minHeight", `${e.target.value}px`)}
-                value={Number.parseInt(element?.style?.minHeight) || 100}
-              />
-              <span className="range-value">{Number.parseInt(element?.style?.minHeight) || 100}px</span>
+                />
+                <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                  {Number.parseInt(element?.style?.width) || 100}%
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Min Height: </label>
+              <div className="flex items-center">
+                <input
+                  type="range"
+                  min="50"
+                  max="500"
+                  onChange={(e) => updateStyle("minHeight", `${e.target.value}px`)}
+                  value={Number.parseInt(element?.style?.minHeight) || 100}
+                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+
+                />
+                <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                  {Number.parseInt(element?.style?.minHeight) || 100}px
+                </span>
+              </div>
+            </div>
+
+            {/* NEW: Max Width */}
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Max Width: </label>
+              <div className="flex items-center">
+                <input
+                  type="range"
+                  min="0"
+                  max="1200"
+                  step="50"
+                  onChange={(e) => updateStyle("maxWidth", e.target.value === "0" ? "none" : `${e.target.value}px`)}
+                  value={element?.style?.maxWidth === "none" ? 0 : Number.parseInt(element?.style?.maxWidth) || 0}
+                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                />
+                <span className="ml-3 min-w-[50px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                  {element?.style?.maxWidth === "none" ? "None" : `${Number.parseInt(element?.style?.maxWidth) || 0}px`}
+                </span>
+              </div>
+            </div>
+
+            {/* NEW: Max Height */}
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Max Height: </label>
+              <div className="flex items-center">
+                <input
+                  type="range"
+                  min="0"
+                  max="1000"
+                  step="50"
+                  onChange={(e) => updateStyle("maxHeight", e.target.value === "0" ? "none" : `${e.target.value}px`)}
+                  value={element?.style?.maxHeight === "none" ? 0 : Number.parseInt(element?.style?.maxHeight) || 0}
+                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                />
+                <span className="ml-3 min-w-[50px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                  {element?.style?.maxHeight === "none" ? "None" : `${Number.parseInt(element?.style?.maxHeight) || 0}px`}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {element?.type === "button" && (
-        <div className="style-section">
-          <h4>Button Settings</h4>
-          <div className="style-control">
-            <label>Cursor: </label>
-            <select onChange={(e) => updateStyle("cursor", e.target.value)} value={element?.style?.cursor || "pointer"}>
-              <option value="pointer">Pointer</option>
-              <option value="default">Default</option>
-              <option value="not-allowed">Not Allowed</option>
-            </select>
-          </div>
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
+          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Button Settings</h4>
+          <div className="space-y-4">
+            {/* Button Text Size */}
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Text Size: </label>
+              <div className="flex items-center">
+                <input
+                  type="range"
+                  min="12"
+                  max="24"
+                  onChange={(e) => updateStyle("fontSize", `${e.target.value}px`)}
+                  value={Number.parseInt(element?.style?.fontSize) || 16}
+                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                />
+                <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                  {Number.parseInt(element?.style?.fontSize) || 16}px
+                </span>
+              </div>
+            </div>
 
-          <div className="style-control button-presets">
-            <button
-              onClick={() => {
-                updateStyle("background", "#4CAF50")
-                updateStyle("color", "white")
-                updateStyle("border", "none")
-                updateStyle("padding", "10px 20px")
-                updateStyle("borderRadius", "4px")
-                updateStyle("cursor", "pointer")
-              }}
-              className="preset-button green"
-            >
-              Apply Green Button Style
-            </button>
+            {/* Button Padding */}
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Padding: </label>
+              <div className="flex items-center">
+                <input
+                  type="range"
+                  min="4"
+                  max="20"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    updateStyle("padding", `${Math.floor(value / 2)}px ${value}px`);
+                  }}
+                  value={Number.parseInt((element?.style?.padding || "10px 20px").split(" ")[1]) || 20}
+                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                />
+                <span className="ml-3 min-w-[60px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                  {Number.parseInt((element?.style?.padding || "10px 20px").split(" ")[1]) || 20}px
+                </span>
+              </div>
+            </div>
 
-            <button
-              onClick={() => {
-                updateStyle("background", "#f44336")
-                updateStyle("color", "white")
-                updateStyle("border", "none")
-                updateStyle("padding", "10px 20px")
-                updateStyle("borderRadius", "4px")
-                updateStyle("cursor", "pointer")
-              }}
-              className="preset-button red"
-            >
-              Apply Red Button Style
-            </button>
+            {/* Border Radius */}
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Border Radius: </label>
+              <div className="flex items-center">
+                <input
+                  type="range"
+                  min="0"
+                  max="24"
+                  onChange={(e) => updateStyle("borderRadius", `${e.target.value}px`)}
+                  value={Number.parseInt(element?.style?.borderRadius) || 4}
+                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                />
+                <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                  {Number.parseInt(element?.style?.borderRadius) || 4}px
+                </span>
+              </div>
+            </div>
 
-            <button
-              onClick={() => {
-                updateStyle("background", "#2196F3")
-                updateStyle("color", "white")
-                updateStyle("border", "none")
-                updateStyle("padding", "10px 20px")
-                updateStyle("borderRadius", "4px")
-                updateStyle("cursor", "pointer")
-              }}
-              className="preset-button blue"
-            >
-              Apply Blue Button Style
-            </button>
+            {/* Cursor Type */}
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Cursor: </label>
+              <select
+                onChange={(e) => updateStyle("cursor", e.target.value)}
+                value={element?.style?.cursor || "pointer"}
+                className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+              >
+                <option value="pointer">Pointer</option>
+                <option value="default">Default</option>
+                <option value="not-allowed">Not Allowed</option>
+              </select>
+            </div>
+
+
+
+
           </div>
         </div>
       )}
+
+
+      <div className="h-16">
+        
+          </div>
     </div>
   )
 }
@@ -914,9 +1767,7 @@ function PreviewModal({ components, isOpen, setIsOpen }) {
 
     // Handle self-closing tags
     if (comp.closing === 0) {
-      return `<${comp.type} style="${styleStr}" ${
-        comp.src ? `src="${comp.src}"` : ""
-      } ${comp.alt ? `alt="${comp.alt}"` : ""} />`
+      return `<${comp.type} style="${styleStr}" ${comp.src ? `src="${comp.src}"` : ""} ${comp.alt ? `alt="${comp.alt}"` : ""} />`
     }
 
     // Handle container with children
@@ -925,23 +1776,25 @@ function PreviewModal({ components, isOpen, setIsOpen }) {
       childrenHTML = comp.children.map((child) => renderComponentToHTML(child)).join("")
     }
 
-    return `<${comp.type} style="${styleStr}" ${
-      comp.href ? `href="${comp.href}"` : ""
-    }>${comp.content || ""}${childrenHTML}</${comp.type}>`
+    return `<${comp.type} style="${styleStr}" ${comp.href ? `href="${comp.href}"` : ""}>${comp.content || ""}${childrenHTML}</${comp.type}>`
   }
 
   const htmlOutput = components.map((comp) => renderComponentToHTML(comp)).join("")
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <button onClick={() => setIsOpen(false)} className="modal-close">
-          ×
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-xl w-4/5 h-4/5 flex flex-col relative shadow-2xl">
+        <button
+          onClick={() => setIsOpen(false)}
+          className="absolute top-4 right-4 bg-rose-500 text-white rounded-full w-8 h-8 flex items-center justify-center cursor-pointer text-base hover:bg-rose-600 transition-colors"
+          aria-label="Close preview"
+        >
+          <X className="h-5 w-5" />
         </button>
 
-        <h2>Preview</h2>
+        <h2 className="text-2xl font-bold mb-5 text-slate-800">Preview</h2>
 
-        <div className="modal-actions">
+        <div className="flex gap-5 mb-5">
           <button
             onClick={() => {
               const blob = new Blob([htmlOutput], { type: "text/html" })
@@ -952,7 +1805,7 @@ function PreviewModal({ components, isOpen, setIsOpen }) {
               a.click()
               URL.revokeObjectURL(url)
             }}
-            className="action-button export-html"
+            className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none rounded-lg cursor-pointer hover:from-emerald-600 hover:to-emerald-700 transition-colors shadow-md font-medium"
           >
             Export HTML
           </button>
@@ -968,19 +1821,21 @@ function PreviewModal({ components, isOpen, setIsOpen }) {
               a.click()
               URL.revokeObjectURL(url)
             }}
-            className="action-button export-json"
+            className="px-5 py-2.5 bg-gradient-to-r from-violet-500 to-violet-600 text-white border-none rounded-lg cursor-pointer hover:from-violet-600 hover:to-violet-700 transition-colors shadow-md font-medium"
           >
             Export JSON
           </button>
         </div>
 
-        <div className="preview-area">
+        <div className="flex-1 border border-slate-200 rounded-lg p-5 overflow-auto bg-white shadow-inner">
           <div dangerouslySetInnerHTML={{ __html: htmlOutput }} />
         </div>
 
-        <div className="html-output">
-          <h3>HTML Output</h3>
-          <pre>{htmlOutput}</pre>
+        <div className="mt-5 p-4 bg-slate-50 rounded-lg max-h-[200px] overflow-auto border border-slate-200">
+          <h3 className="text-lg font-medium mb-2.5 text-slate-800">HTML Output</h3>
+          <pre className="whitespace-pre-wrap text-xs bg-violet-100 p-3 rounded border border-slate-200 overflow-x-auto">
+            {htmlOutput}
+          </pre>
         </div>
       </div>
     </div>
@@ -1001,23 +1856,17 @@ function CodeExportModal({ components, isOpen, setIsOpen }) {
 
       // Handle self-closing tags
       if (comp.closing === 0) {
-        return `${indentStr}<${comp.type}\n${indentStr}  style={${styleObj}}\n${indentStr}  ${
-          comp.src ? `src="${comp.src}"` : ""
-        }\n${indentStr}  ${comp.alt ? `alt="${comp.alt}"` : ""}\n${indentStr}/>`
+        return `${indentStr}<${comp.type}\n${indentStr}  style={${styleObj}}\n${indentStr}  ${comp.src ? `src="${comp.src}"` : ""}\n${indentStr}  ${comp.alt ? `alt="${comp.alt}"` : ""}\n${indentStr}/>`
       }
 
       // Handle container with children
       let childrenJSX = ""
       if (comp.children && comp.children.length > 0) {
         childrenJSX = comp.children.map((child) => renderComponentToJSX(child, indent + 1)).join("\n")
-        return `${indentStr}<${comp.type} style={${styleObj}} ${comp.href ? `href="${comp.href}"` : ""}>\n${
-          comp.content ? `${indentStr}  ${comp.content}\n` : ""
-        }${childrenJSX}\n${indentStr}</${comp.type}>`
+        return `${indentStr}<${comp.type} style={${styleObj}} ${comp.href ? `href="${comp.href}"` : ""}>\n${comp.content ? `${indentStr}  ${comp.content}\n` : ""}${childrenJSX}\n${indentStr}</${comp.type}>`
       }
 
-      return `${indentStr}<${comp.type} style={${styleObj}} ${
-        comp.href ? `href="${comp.href}"` : ""
-      }>${comp.content || ""}</${comp.type}>`
+      return `${indentStr}<${comp.type} style={${styleObj}} ${comp.href ? `href="${comp.href}"` : ""}>${comp.content || ""}</${comp.type}>`
     }
 
     const componentJSX = components.map((comp) => renderComponentToJSX(comp)).join("\n")
@@ -1034,15 +1883,19 @@ ${componentJSX}
   const reactCode = generateReactCode()
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <button onClick={() => setIsOpen(false)} className="modal-close">
-          ×
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-xl w-4/5 h-4/5 flex flex-col relative shadow-2xl">
+        <button
+          onClick={() => setIsOpen(false)}
+          className="absolute top-4 right-4 bg-rose-500 text-white rounded-full w-8 h-8 flex items-center justify-center cursor-pointer text-base hover:bg-rose-600 transition-colors"
+          aria-label="Close code export"
+        >
+          <X className="h-5 w-5" />
         </button>
 
-        <h2>Export React Code</h2>
+        <h2 className="text-2xl font-bold mb-5 text-slate-800">Export React Code</h2>
 
-        <div className="modal-actions">
+        <div className="flex gap-5 mb-5">
           <button
             onClick={() => {
               const blob = new Blob([reactCode], { type: "text/javascript" })
@@ -1053,7 +1906,7 @@ ${componentJSX}
               a.click()
               URL.revokeObjectURL(url)
             }}
-            className="action-button export-react"
+            className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none rounded-lg cursor-pointer hover:from-emerald-600 hover:to-emerald-700 transition-colors shadow-md font-medium"
           >
             Download React Component
           </button>
@@ -1063,14 +1916,14 @@ ${componentJSX}
               navigator.clipboard.writeText(reactCode)
               alert("Code copied to clipboard!")
             }}
-            className="action-button copy-code"
+            className="px-5 py-2.5 bg-gradient-to-r from-violet-500 to-violet-600 text-white border-none rounded-lg cursor-pointer hover:from-violet-600 hover:to-violet-700 transition-colors shadow-md font-medium"
           >
             Copy to Clipboard
           </button>
         </div>
 
-        <div className="code-preview">
-          <pre>{reactCode}</pre>
+        <div className="flex-1 border border-slate-200 rounded-lg p-5 overflow-auto bg-slate-50 font-mono shadow-inner">
+          <pre className="whitespace-pre-wrap text-sm">{reactCode}</pre>
         </div>
       </div>
     </div>
@@ -1082,26 +1935,6 @@ export default function PageBuilder() {
   const [selectedElement, setSelectedElement] = useState(null)
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
   const [isCodeExportModalOpen, setIsCodeExportModalOpen] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-
-  useEffect(() => {
-    // Check if device is mobile
-    const checkIfMobile = () => {
-      const mobile = window.innerWidth <= 768
-      setIsMobile(mobile)
-      if (mobile && sidebarOpen) {
-        setSidebarOpen(false)
-      }
-    }
-
-    checkIfMobile()
-    window.addEventListener("resize", checkIfMobile)
-
-    return () => {
-      window.removeEventListener("resize", checkIfMobile)
-    }
-  }, [sidebarOpen])
 
   const handleDragEnd = (event) => {
     const { active, over } = event
@@ -1185,37 +2018,30 @@ export default function PageBuilder() {
     }
   }
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen)
-  }
-
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="editor-container">
-        <div className="editor-header">
-          <button className="sidebar-toggle" onClick={toggleSidebar}>
-            {sidebarOpen ? "◀" : "▶"}
-          </button>
-          <h1>SiteBuilder Editor</h1>
+      <div className="flex h-screen overflow-hidden bg-slate-50">
+        <div className="w-1/5 p-4 border-r border-slate-200 overflow-y-auto bg-white shadow-md">
+          <h2 className="text-xl font-bold mb-4 text-slate-800 pb-2 border-b border-slate-200">Components</h2>
+          <ComponentCategoryList categories={componentCategories} />
         </div>
 
-        <div className="editor-main">
-          <div className={`editor-sidebar ${sidebarOpen ? "open" : "closed"}`}>
-            <h2>Components</h2>
-            <ComponentCategoryList categories={componentCategories} />
-          </div>
+        <Canvas components={components} setComponents={setComponents} setSelectedElement={setSelectedElement} />
 
-          <Canvas components={components} setComponents={setComponents} setSelectedElement={setSelectedElement} />
+        <RightPanel selectedElement={selectedElement} setComponents={setComponents} components={components} />
 
-          <RightPanel selectedElement={selectedElement} setComponents={setComponents} components={components} />
-        </div>
-
-        <div className="editor-actions">
-          <button onClick={() => setIsPreviewModalOpen(true)} className="action-button preview-button">
+        <div className="fixed bottom-6 right-6 flex gap-3 z-10">
+          <button
+            onClick={() => setIsPreviewModalOpen(true)}
+            className="px-5 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none rounded-lg cursor-pointer shadow-lg hover:from-emerald-600 hover:to-emerald-700 transition-colors font-medium"
+          >
             Preview
           </button>
 
-          <button onClick={() => setIsCodeExportModalOpen(true)} className="action-button export-button">
+          <button
+            onClick={() => setIsCodeExportModalOpen(true)}
+            className="px-5 py-3 bg-gradient-to-r from-violet-500 to-violet-600 text-white border-none rounded-lg cursor-pointer shadow-lg hover:from-violet-600 hover:to-violet-700 transition-colors font-medium"
+          >
             Export Code
           </button>
         </div>
