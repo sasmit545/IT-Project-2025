@@ -10,32 +10,29 @@ import "./App.css"
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Check if user is authenticated on component mount
   useEffect(() => {
     const token = localStorage.getItem("userToken")
     if (token) {
       setIsAuthenticated(true)
     }
+    setIsLoading(false)
   }, [])
 
-  // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("userToken")
     localStorage.removeItem("userData")
     setIsAuthenticated(false)
   }
 
+  if (isLoading) {
+    return <div className="loading">Loading...</div>
+  }
+
   return (
     <Router>
       <div className="app-container">
-        {isAuthenticated && (
-          <header className="nav-header">
-            <button onClick={handleLogout} className="logout-btn">
-              Logout
-            </button>
-          </header>
-        )}
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route
@@ -44,12 +41,22 @@ function App() {
               isAuthenticated ? <Navigate to="/dashboard" /> : <AuthForm onAuthentication={setIsAuthenticated} />
             }
           />
-          <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/auth" />} />
-          <Route path="/editor" element={isAuthenticated ? <Editor /> : <Navigate to="/auth" />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              isAuthenticated ? <Dashboard onLogout={handleLogout} /> : <Navigate to="/auth" />
+            } 
+          />
+          <Route 
+            path="/editor" 
+            element={
+              isAuthenticated ? <Editor onLogout={handleLogout} /> : <Navigate to="/auth" />
+            } 
+          />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
     </Router>
-    
   )
 }
 

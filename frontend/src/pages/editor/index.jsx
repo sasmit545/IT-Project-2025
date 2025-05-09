@@ -1,11 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core"
+import { DndContext, useDndContext, useDraggable, useDroppable } from "@dnd-kit/core"
 import { X, ChevronDown, ChevronRight } from "lucide-react"
-import { FaTextHeight, FaRegSquare, FaRegImage, FaListUl, FaLink } from "react-icons/fa"
+import {
+  FaParagraph,
+  FaSquare,
+  FaBox,
+  FaHeading,
+  FaImage,
+  FaListUl,
+  FaLink
+} from "react-icons/fa";
 import "./editor.css"
-
+import Navigation from "../../components/navigation";
 
 
 
@@ -62,22 +70,22 @@ const componentsList = [
 
 // Icons mapped by component id
 const categoryIcons = {
-  text: <FaTextHeight className="h-5 w-5" />,
-  button: <FaRegSquare className="h-5 w-5" />,
-  container: <FaRegSquare className="h-5 w-5" />,
-  heading: <FaTextHeight className="h-5 w-5" />,
-  image: <FaRegImage className="h-5 w-5" />,
-  list: <FaListUl className="h-5 w-5" />,
-  link: <FaLink className="h-5 w-5" />,
-}
+  text: <FaParagraph className="h-5 w-5" />,           // better for text/paragraph
+  button: <FaSquare className="h-5 w-5" />,             // simple block-like button
+  container: <FaBox className="h-5 w-5" />,             // container/box metaphor
+  heading: <FaHeading className="h-5 w-5" />,           // clear for headings/titles
+  image: <FaImage className="h-5 w-5" />,               // image icon
+  list: <FaListUl className="h-5 w-5" />,               // unordered list
+  link: <FaLink className="h-5 w-5" />                  // link icon
+};
 const componentColors = {
-  text: 'bg-pink-100',
-  heading: 'bg-blue-100',
-  button: 'bg-green-100',
-  container: 'bg-cyan-100',
-  image: 'bg-purple-100',
-  list: 'bg-yellow-100',
-  link: 'bg-teal-100',
+  text: 'bg-gradient-to-r from-rose-100 via-rose-200 to-pink-200',
+  heading: 'bg-gradient-to-r from-sky-100 via-sky-200 to-blue-200',
+  button: 'bg-gradient-to-r from-emerald-100 via-green-200 to-lime-200',
+  container: 'bg-gradient-to-r from-cyan-100 via-teal-100 to-sky-100',
+  image: 'bg-gradient-to-r from-violet-100 via-purple-200 to-indigo-200',
+  list: 'bg-gradient-to-r from-yellow-100 via-amber-200 to-orange-100',
+  link: 'bg-gradient-to-r from-teal-100 via-cyan-200 to-blue-100',
 };
 
 
@@ -90,8 +98,15 @@ const componentCategories = [
   { id: "navigation", label: "Navigation", components: ["link", "list"] },
 ]
 
+
+
+
 function DraggableComponent({ id, content, icon }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
+  const { active } = useDndContext();
+
+  const isDragging = active?.id === id;
+
   const style = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : {};
@@ -113,8 +128,7 @@ function DraggableComponent({ id, content, icon }) {
         transition-all duration-200 ease-in-out 
         hover:shadow-lg 
         hover:scale-[1.02] 
-       
-        
+        ${isDragging ? 'absolute z-10 w-48' : ''}
       `}
       style={style}
     >
@@ -123,7 +137,6 @@ function DraggableComponent({ id, content, icon }) {
     </div>
   );
 }
-
 
 
 // Expandable category list
@@ -165,6 +178,7 @@ function ComponentCategoryList({ categories }) {
               {category.components.map((compId) => {
                 const comp = componentsList.find((c) => c.id === compId)
                 return (
+                 
                   comp && (
                     <DraggableComponent
                       key={comp.id}
@@ -1930,12 +1944,37 @@ ${componentJSX}
   )
 }
 
-export default function PageBuilder() {
+export default function PageBuilder({ onLogout }) {
   const [components, setComponents] = useState([])
   const [selectedElement, setSelectedElement] = useState(null)
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
   const [isCodeExportModalOpen, setIsCodeExportModalOpen] = useState(false)
+  const [userData, setUserData] = useState(null)
 
+
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const storedUserData = localStorage.getItem("userData")
+
+    if (storedUserData) {
+      setUserData(JSON.parse(storedUserData))
+    }
+
+  }, [])
+
+
+
+
+  const handleMenuAction = (action) => {
+    if (action === "logout") {
+      onLogout()
+    } else if (action === "profile") {
+      // Navigate to profile page
+    } else if (action === "settings") {
+      // Navigate to settings page
+    }
+  }
   const handleDragEnd = (event) => {
     const { active, over } = event
 
@@ -2019,6 +2058,9 @@ export default function PageBuilder() {
   }
 
   return (
+    <div>
+     <Navigation userData={userData} onMenuAction={handleMenuAction} />
+
     <DndContext onDragEnd={handleDragEnd}>
       <div className="flex h-screen overflow-hidden bg-slate-50">
         <div className="w-1/5 p-4 border-r border-slate-200 overflow-y-auto bg-white shadow-md">
@@ -2051,5 +2093,7 @@ export default function PageBuilder() {
 
       <CodeExportModal components={components} isOpen={isCodeExportModalOpen} setIsOpen={setIsCodeExportModalOpen} />
     </DndContext>
+    </div>
+    
   )
 }

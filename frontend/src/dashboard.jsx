@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import Navigation from "./components/navigation"
 import "./dashboard.css"
 
-export default function Dashboard() {
+export default function Dashboard({ onLogout }) {
   const [userData, setUserData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [projects, setProjects] = useState([])
-  const [isMobile, setIsMobile] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -19,14 +18,6 @@ export default function Dashboard() {
     if (storedUserData) {
       setUserData(JSON.parse(storedUserData))
     }
-
-    // Check if device is mobile
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
-
-    checkIfMobile()
-    window.addEventListener("resize", checkIfMobile)
 
     // Simulate fetching projects
     setTimeout(() => {
@@ -52,14 +43,16 @@ export default function Dashboard() {
       ])
       setIsLoading(false)
     }, 1000)
-
-    return () => {
-      window.removeEventListener("resize", checkIfMobile)
-    }
   }, [])
 
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen)
+  const handleMenuAction = (action) => {
+    if (action === "logout") {
+      onLogout()
+    } else if (action === "profile") {
+      // Navigate to profile page
+    } else if (action === "settings") {
+      // Navigate to settings page
+    }
   }
 
   const handleEditProject = (projectId) => {
@@ -81,71 +74,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      <header className="dashboard-header">
-        <div className="header-left">
-          <div className="logo">
-            <span className="logo-square"></span>
-            <span className="logo-text">SiteBuilder</span>
-          </div>
-        </div>
-        <div className="header-right">
-          {isMobile ? (
-            <>
-              <button className="menu-toggle" onClick={toggleMenu}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M3 12H21M3 6H21M3 18H21"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-              <div className={`mobile-menu ${menuOpen ? "open" : ""}`}>
-                <div className="mobile-menu-header">
-                  <div className="avatar">{userData?.username?.charAt(0).toUpperCase() || "U"}</div>
-                  <span className="username">{userData?.username || "User"}</span>
-                  <button className="close-menu" onClick={toggleMenu}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M18 6L6 18M6 6L18 18"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
-                <div className="mobile-menu-content">
-                  <a href="#profile">Profile</a>
-                  <a href="#settings">Settings</a>
-                  <a href="#logout">Logout</a>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="user-menu">
-              <span className="username">{userData?.username || "User"}</span>
-              <div className="avatar">{userData?.username?.charAt(0).toUpperCase() || "U"}</div>
-              <div className="dropdown-menu">
-                <ul>
-                  <li>
-                    <a href="#profile">Profile</a>
-                  </li>
-                  <li>
-                    <a href="#settings">Settings</a>
-                  </li>
-                  <li>
-                    <a href="#logout">Logout</a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          )}
-        </div>
-      </header>
+      <Navigation userData={userData} onMenuAction={handleMenuAction} />
 
       <main className="dashboard-main">
         <div className="welcome-section">
@@ -183,16 +112,14 @@ export default function Dashboard() {
         <section className="projects-section">
           <div className="section-header">
             <h2>Recent Projects</h2>
-            <a href="#all-projects" className="view-all">
-              View all
-            </a>
+            <button className="view-all">View all</button>
           </div>
 
           <div className="projects-grid">
             {projects.map((project) => (
               <div key={project.id} className="project-card">
                 <div className="project-thumbnail">
-                  <img src={project.thumbnail || "/placeholder.svg"} alt={project.name} />
+                  <img src={project.thumbnail} alt={project.name} />
                 </div>
                 <div className="project-info">
                   <h3>{project.name}</h3>
@@ -202,7 +129,7 @@ export default function Dashboard() {
                   <button onClick={() => handleEditProject(project.id)} className="edit-button">
                     Edit
                   </button>
-                  <button className="more-button">
+                  <button className="more-button" aria-label="More options">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z"
@@ -243,63 +170,29 @@ export default function Dashboard() {
         <section className="templates-section">
           <div className="section-header">
             <h2>Templates</h2>
-            <a href="#all-templates" className="view-all">
-              View all
-            </a>
+            <button className="view-all">View all</button>
           </div>
 
           <div className="templates-grid">
-            <div className="template-card">
-              <div className="template-thumbnail">
-                <img src="/placeholder.svg?height=120&width=200" alt="Landing Page Template" />
+            {[
+              { name: "Landing Page", desc: "Perfect for product launches", img: "/placeholder.svg?height=120&width=200" },
+              { name: "Portfolio", desc: "Showcase your work", img: "/placeholder.svg?height=120&width=200" },
+              { name: "Blog", desc: "Share your thoughts", img: "/placeholder.svg?height=120&width=200" },
+              { name: "E-commerce", desc: "Sell products online", img: "/placeholder.svg?height=120&width=200" }
+            ].map((template, index) => (
+              <div key={index} className="template-card">
+                <div className="template-thumbnail">
+                  <img src={template.img} alt={`${template.name} Template`} />
+                </div>
+                <div className="template-info">
+                  <h3>{template.name}</h3>
+                  <p>{template.desc}</p>
+                </div>
+                <button onClick={handleNewProject} className="use-template-button">
+                  Use Template
+                </button>
               </div>
-              <div className="template-info">
-                <h3>Landing Page</h3>
-                <p>Perfect for product launches</p>
-              </div>
-              <button onClick={handleNewProject} className="use-template-button">
-                Use Template
-              </button>
-            </div>
-
-            <div className="template-card">
-              <div className="template-thumbnail">
-                <img src="/placeholder.svg?height=120&width=200" alt="Portfolio Template" />
-              </div>
-              <div className="template-info">
-                <h3>Portfolio</h3>
-                <p>Showcase your work</p>
-              </div>
-              <button onClick={handleNewProject} className="use-template-button">
-                Use Template
-              </button>
-            </div>
-
-            <div className="template-card">
-              <div className="template-thumbnail">
-                <img src="/placeholder.svg?height=120&width=200" alt="Blog Template" />
-              </div>
-              <div className="template-info">
-                <h3>Blog</h3>
-                <p>Share your thoughts</p>
-              </div>
-              <button onClick={handleNewProject} className="use-template-button">
-                Use Template
-              </button>
-            </div>
-
-            <div className="template-card">
-              <div className="template-thumbnail">
-                <img src="/placeholder.svg?height=120&width=200" alt="E-commerce Template" />
-              </div>
-              <div className="template-info">
-                <h3>E-commerce</h3>
-                <p>Sell products online</p>
-              </div>
-              <button onClick={handleNewProject} className="use-template-button">
-                Use Template
-              </button>
-            </div>
+            ))}
           </div>
         </section>
       </main>
