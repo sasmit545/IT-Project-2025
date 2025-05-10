@@ -37,6 +37,26 @@ const componentsList = [
     type: "button",
     style: {},
     closing: 1,
+    onClick: {
+      action: "none",
+      options: {
+        link: "",
+        target: "_blank",
+        customJs: "",
+      },
+    },
+    onHover: {
+      action: "none",
+      options: {
+        style: {
+          backgroundColor: "",
+          color: "",
+          borderColor: "",
+          transform: "",
+        },
+        tooltip: "",
+      },
+    },
   },
   {
     id: "container",
@@ -116,6 +136,193 @@ const componentCategories = [
   { id: "media", label: "Media", components: ["image"] },
   { id: "navigation", label: "Navigation", components: ["link", "list"] },
 ];
+
+// onClick Property Editor Component
+function OnClickPropertyEditor({ selectedComponent, onUpdateComponent }) {
+  const onClick = selectedComponent.onClick || { action: "none", options: {} };
+
+  const handleActionChange = (e) => {
+    const newOnClick = {
+      ...onClick,
+      action: e.target.value,
+      options: onClick.options || {},
+    };
+    onUpdateComponent({ ...selectedComponent, onClick: newOnClick });
+  };
+
+  const handleOptionsChange = (key, value) => {
+    const newOnClick = {
+      ...onClick,
+      options: {
+        ...onClick.options,
+        [key]: value,
+      },
+    };
+    onUpdateComponent({ ...selectedComponent, onClick: newOnClick });
+  };
+
+  return (
+    <div className="property-group">
+      <h3 className="property-group-title">On Click</h3>
+      <div className="property-field">
+        <label>Action</label>
+        <select value={onClick.action} onChange={handleActionChange}>
+          <option value="none">None</option>
+          <option value="link">Navigate to URL</option>
+          <option value="submit">Submit Form</option>
+          <option value="custom">Custom JS</option>
+        </select>
+      </div>
+
+      {onClick.action === "link" && (
+        <>
+          <div className="property-field">
+            <label>URL</label>
+            <input
+              type="text"
+              value={onClick.options.link || ""}
+              onChange={(e) => handleOptionsChange("link", e.target.value)}
+              placeholder="https://example.com"
+            />
+          </div>
+          <div className="property-field">
+            <label>Open in</label>
+            <select
+              value={onClick.options.target || "_blank"}
+              onChange={(e) => handleOptionsChange("target", e.target.value)}
+            >
+              <option value="_blank">New Window</option>
+              <option value="_self">Same Window</option>
+            </select>
+          </div>
+        </>
+      )}
+
+      {onClick.action === "custom" && (
+        <div className="property-field">
+          <label>Custom JavaScript</label>
+          <textarea
+            value={onClick.options.customJs || ""}
+            onChange={(e) => handleOptionsChange("customJs", e.target.value)}
+            placeholder="console.log('Button clicked');"
+            rows={4}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// onHover Property Editor Component
+function OnHoverPropertyEditor({ selectedComponent, onUpdateComponent }) {
+  const onHover = selectedComponent.onHover || {
+    action: "none",
+    options: { style: {} },
+  };
+
+  const handleActionChange = (e) => {
+    const newOnHover = {
+      ...onHover,
+      action: e.target.value,
+      options: onHover.options || { style: {} },
+    };
+    onUpdateComponent({ ...selectedComponent, onHover: newOnHover });
+  };
+
+  const handleStyleChange = (styleKey, value) => {
+    const newOnHover = {
+      ...onHover,
+      options: {
+        ...onHover.options,
+        style: {
+          ...onHover.options.style,
+          [styleKey]: value,
+        },
+      },
+    };
+    onUpdateComponent({ ...selectedComponent, onHover: newOnHover });
+  };
+
+  const handleTooltipChange = (value) => {
+    const newOnHover = {
+      ...onHover,
+      options: {
+        ...onHover.options,
+        tooltip: value,
+      },
+    };
+    onUpdateComponent({ ...selectedComponent, onHover: newOnHover });
+  };
+
+  return (
+    <div className="property-group">
+      <h3 className="property-group-title">On Hover</h3>
+      <div className="property-field">
+        <label>Effect</label>
+        <select value={onHover.action} onChange={handleActionChange}>
+          <option value="none">None</option>
+          <option value="style">Change Style</option>
+          <option value="tooltip">Show Tooltip</option>
+        </select>
+      </div>
+
+      {onHover.action === "style" && (
+        <>
+          <div className="property-field">
+            <label>Background Color</label>
+            <input
+              type="color"
+              value={onHover.options.style.backgroundColor || "#ffffff"}
+              onChange={(e) =>
+                handleStyleChange("backgroundColor", e.target.value)
+              }
+            />
+          </div>
+          <div className="property-field">
+            <label>Text Color</label>
+            <input
+              type="color"
+              value={onHover.options.style.color || "#000000"}
+              onChange={(e) => handleStyleChange("color", e.target.value)}
+            />
+          </div>
+          <div className="property-field">
+            <label>Border Color</label>
+            <input
+              type="color"
+              value={onHover.options.style.borderColor || "#000000"}
+              onChange={(e) => handleStyleChange("borderColor", e.target.value)}
+            />
+          </div>
+          <div className="property-field">
+            <label>Transform</label>
+            <select
+              value={onHover.options.style.transform || "none"}
+              onChange={(e) => handleStyleChange("transform", e.target.value)}
+            >
+              <option value="none">None</option>
+              <option value="scale(1.05)">Scale Up</option>
+              <option value="scale(0.95)">Scale Down</option>
+              <option value="translateY(-2px)">Move Up</option>
+            </select>
+          </div>
+        </>
+      )}
+
+      {onHover.action === "tooltip" && (
+        <div className="property-field">
+          <label>Tooltip Text</label>
+          <input
+            type="text"
+            value={onHover.options.tooltip || ""}
+            onChange={(e) => handleTooltipChange(e.target.value)}
+            placeholder="Enter tooltip text"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 function DraggableComponent({ id, content, icon }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
@@ -444,10 +651,46 @@ function RenderComponent({
   const ComponentType = component.type;
 
   const props = {
-    style: component.style,
+    style: { ...component.style },
     onClick: (e) => {
       e.stopPropagation();
       setSelectedElement({ path: componentPath, ...component });
+
+      if (component.onClick) {
+        const { action, options } = component.onClick;
+        if (action === "link" && options.link) {
+          window.open(options.link, options.target || "_blank");
+        } else if (action === "submit") {
+          // Implement form submission logic if needed
+          console.log("Form submitted (simulate)");
+        } else if (action === "custom" && options.customJs) {
+          try {
+            // ⚠️ Warning: eval can be dangerous!
+            // Use sandboxing if you expose this to untrusted users
+            new Function(options.customJs)();
+          } catch (error) {
+            console.error("Custom JS Error:", error);
+          }
+        }
+      }
+    },
+    onMouseEnter: (e) => {
+      if (component.onHover?.action === "style") {
+        Object.assign(e.currentTarget.style, component.onHover.options?.style);
+      } else if (component.onHover?.action === "tooltip") {
+        const tooltipText = component.onHover.options?.tooltip;
+        if (tooltipText) {
+          e.currentTarget.setAttribute("title", tooltipText);
+        }
+      }
+    },
+    onMouseLeave: (e) => {
+      if (component.onHover?.action === "style") {
+        // Reset to original style (not perfect, consider caching original)
+        Object.assign(e.currentTarget.style, component.style || {});
+      } else {
+        e.currentTarget.removeAttribute("title");
+      }
     },
   };
 
@@ -688,6 +931,25 @@ function RightPanel({ selectedElement, setComponents, components }) {
     Object.entries(styleObject).forEach(([property, value]) => {
       updateStyle(property, value);
     });
+  };
+
+  const updateComponentByPath = (updatedComponent) => {
+    const updatedComponents = [...components];
+    const path = selectedElement.path;
+    let currentLevel = updatedComponents;
+
+    for (let i = 0; i < path.length; i++) {
+      if (i === path.length - 1) {
+        currentLevel[path[i]] = updatedComponent;
+      } else if (path[i] === "children") {
+        currentLevel = currentLevel.children;
+      } else {
+        currentLevel = currentLevel[path[i]];
+      }
+    }
+
+    setComponents(updatedComponents);
+    setElement(updatedComponent);
   };
 
   return (
@@ -2060,6 +2322,16 @@ function RightPanel({ selectedElement, setComponents, components }) {
             Button Settings
           </h4>
           <div className="space-y-4">
+            <OnClickPropertyEditor
+              selectedComponent={element}
+              onUpdateComponent={updateComponentByPath}
+            />
+
+            <OnHoverPropertyEditor
+              selectedComponent={element}
+              onUpdateComponent={updateComponentByPath}
+            />
+
             {/* Button Text Size */}
             <div>
               <label className="block mb-1 text-sm font-medium text-slate-700">
