@@ -1,8 +1,13 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { DndContext, useDndContext, useDraggable, useDroppable } from "@dnd-kit/core"
-import { X, ChevronDown, ChevronRight } from "lucide-react"
+import { useState, useEffect } from "react";
+import {
+  DndContext,
+  useDndContext,
+  useDraggable,
+  useDroppable,
+} from "@dnd-kit/core";
+import { X, ChevronDown, ChevronRight } from "lucide-react";
 import {
   FaParagraph,
   FaSquare,
@@ -10,17 +15,29 @@ import {
   FaHeading,
   FaImage,
   FaListUl,
-  FaLink
+  FaLink,
 } from "react-icons/fa";
-import "./editor.css"
+import "./editor.css";
 import Navigation from "../../components/navigation";
-
-
 
 // Components definition
 const componentsList = [
-  { id: "text", label: "Text", content: "Edit this text", type: "div", style: {}, closing: 1 },
-  { id: "button", label: "Button", content: "ClickMe", type: "button", style: {}, closing: 1 },
+  {
+    id: "text",
+    label: "Text",
+    content: "Edit this text",
+    type: "div",
+    style: {},
+    closing: 1,
+  },
+  {
+    id: "button",
+    label: "Button",
+    content: "ClickMe",
+    type: "button",
+    style: {},
+    closing: 1,
+  },
   {
     id: "container",
     label: "Container",
@@ -66,40 +83,39 @@ const componentsList = [
     href: "#",
     closing: 1,
   },
-]
+];
 
 // Icons mapped by component id
 const categoryIcons = {
-  text: <FaParagraph className="h-5 w-5" />,           // better for text/paragraph
-  button: <FaSquare className="h-5 w-5" />,             // simple block-like button
-  container: <FaBox className="h-5 w-5" />,             // container/box metaphor
-  heading: <FaHeading className="h-5 w-5" />,           // clear for headings/titles
-  image: <FaImage className="h-5 w-5" />,               // image icon
-  list: <FaListUl className="h-5 w-5" />,               // unordered list
-  link: <FaLink className="h-5 w-5" />                  // link icon
+  text: <FaParagraph className="h-5 w-5" />, // better for text/paragraph
+  button: <FaSquare className="h-5 w-5" />, // simple block-like button
+  container: <FaBox className="h-5 w-5" />, // container/box metaphor
+  heading: <FaHeading className="h-5 w-5" />, // clear for headings/titles
+  image: <FaImage className="h-5 w-5" />, // image icon
+  list: <FaListUl className="h-5 w-5" />, // unordered list
+  link: <FaLink className="h-5 w-5" />, // link icon
 };
 const componentColors = {
-  text: 'bg-gradient-to-r from-rose-100 via-rose-200 to-pink-200',
-  heading: 'bg-gradient-to-r from-sky-100 via-sky-200 to-blue-200',
-  button: 'bg-gradient-to-r from-emerald-100 via-green-200 to-lime-200',
-  container: 'bg-gradient-to-r from-cyan-100 via-teal-100 to-sky-100',
-  image: 'bg-gradient-to-r from-violet-100 via-purple-200 to-indigo-200',
-  list: 'bg-gradient-to-r from-yellow-100 via-amber-200 to-orange-100',
-  link: 'bg-gradient-to-r from-teal-100 via-cyan-200 to-blue-100',
+  text: "bg-gradient-to-r from-rose-100 via-rose-200 to-pink-200",
+  heading: "bg-gradient-to-r from-sky-100 via-sky-200 to-blue-200",
+  button: "bg-gradient-to-r from-emerald-100 via-green-200 to-lime-200",
+  container: "bg-gradient-to-r from-cyan-100 via-teal-100 to-sky-100",
+  image: "bg-gradient-to-r from-violet-100 via-purple-200 to-indigo-200",
+  list: "bg-gradient-to-r from-yellow-100 via-amber-200 to-orange-100",
+  link: "bg-gradient-to-r from-teal-100 via-cyan-200 to-blue-100",
 };
-
-
 
 // Categories
 const componentCategories = [
-  { id: "basic", label: "Basic Elements", components: ["text", "heading", "button"] },
+  {
+    id: "basic",
+    label: "Basic Elements",
+    components: ["text", "heading", "button"],
+  },
   { id: "layout", label: "Layout", components: ["container"] },
   { id: "media", label: "Media", components: ["image"] },
   { id: "navigation", label: "Navigation", components: ["link", "list"] },
-]
-
-
-
+];
 
 function DraggableComponent({ id, content, icon }) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
@@ -107,15 +123,60 @@ function DraggableComponent({ id, content, icon }) {
 
   const isDragging = active?.id === id;
 
-  const style = transform
-    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-    : {};
+  // Create a clone for dragging that follows the cursor exactly
+  useEffect(() => {
+    if (isDragging) {
+      // Create a clone element that will follow the cursor
+      const clone = document.createElement("div");
+      clone.id = "dragging-clone";
+      clone.className = `p-4 ${componentColors[id]} rounded-xl shadow-md border border-violet-200 flex items-center gap-4 fixed z-50`;
+      clone.style.width = "12rem";
+      clone.style.pointerEvents = "none";
+
+      // Add icon and content to the clone
+      if (icon) {
+        const iconSpan = document.createElement("span");
+        iconSpan.className = "text-gray-600 text-2xl";
+        // We need to render the icon as HTML
+        iconSpan.innerHTML = document.querySelector(
+          `[data-draggable-id="${id}"] span`
+        ).innerHTML;
+        clone.appendChild(iconSpan);
+      }
+
+      const contentSpan = document.createElement("span");
+      contentSpan.className = "text-sm font-medium text-gray-800";
+      contentSpan.textContent = content;
+      clone.appendChild(contentSpan);
+
+      document.body.appendChild(clone);
+
+      // Position the clone at the cursor position
+      const updateClonePosition = (e) => {
+        if (clone) {
+          clone.style.left = `${e.clientX}px`;
+          clone.style.top = `${e.clientY}px`;
+          clone.style.transform = "translate(-50%, -50%)";
+        }
+      };
+
+      document.addEventListener("mousemove", updateClonePosition);
+
+      return () => {
+        document.removeEventListener("mousemove", updateClonePosition);
+        if (clone && clone.parentNode) {
+          document.body.removeChild(clone);
+        }
+      };
+    }
+  }, [isDragging, id, content, icon]);
 
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      data-draggable-id={id}
       className={`
         p-4 
         ${componentColors[id]} 
@@ -127,10 +188,8 @@ function DraggableComponent({ id, content, icon }) {
         flex items-center gap-4 
         transition-all duration-200 ease-in-out 
         hover:shadow-lg 
-        hover:scale-[1.02] 
-        ${isDragging ? 'absolute z-10 w-48' : ''}
+        hover:scale-[1.02]
       `}
-      style={style}
     >
       {icon && <span className="text-gray-600 text-2xl">{icon}</span>}
       <span className="text-sm font-medium text-gray-800">{content}</span>
@@ -138,18 +197,19 @@ function DraggableComponent({ id, content, icon }) {
   );
 }
 
-
 // Expandable category list
 function ComponentCategoryList({ categories }) {
-  const [expandedCategories, setExpandedCategories] = useState(categories.map((cat) => cat.id))
+  const [expandedCategories, setExpandedCategories] = useState(
+    categories.map((cat) => cat.id)
+  );
 
   const toggleCategory = (categoryId) => {
     setExpandedCategories((prev) =>
       prev.includes(categoryId)
         ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId]
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-3">
@@ -176,9 +236,8 @@ function ComponentCategoryList({ categories }) {
           {expandedCategories.includes(category.id) && (
             <div className="p-2 bg-white ">
               {category.components.map((compId) => {
-                const comp = componentsList.find((c) => c.id === compId)
+                const comp = componentsList.find((c) => c.id === compId);
                 return (
-                 
                   comp && (
                     <DraggableComponent
                       key={comp.id}
@@ -187,106 +246,114 @@ function ComponentCategoryList({ categories }) {
                       icon={categoryIcons[comp.id]}
                     />
                   )
-                )
+                );
               })}
             </div>
           )}
         </div>
       ))}
     </div>
-  )
+  );
 }
 
-
-function NestedDroppable({ component, componentPath, components, setComponents, setSelectedElement }) {
+function NestedDroppable({
+  component,
+  componentPath,
+  components,
+  setComponents,
+  setSelectedElement,
+}) {
   const { setNodeRef, isOver } = useDroppable({
     id: `droppable-${componentPath.join("-")}`,
-  })
+  });
 
   const updateContent = (newContent) => {
-    const updatedComponents = [...components]
-    let currentLevel = updatedComponents
+    const updatedComponents = [...components];
+    let currentLevel = updatedComponents;
 
     // Navigate to the correct nesting level except the last index
     for (let i = 0; i < componentPath.length - 1; i++) {
-      currentLevel = currentLevel[componentPath[i]].children
+      currentLevel = currentLevel[componentPath[i]].children;
     }
 
     // Update the content
-    currentLevel[componentPath[componentPath.length - 1]].content = newContent
-    setComponents(updatedComponents)
-  }
+    currentLevel[componentPath[componentPath.length - 1]].content = newContent;
+    setComponents(updatedComponents);
+  };
 
   const handleDrop = (draggedComponent) => {
-    const updatedComponents = [...components]
-    let currentLevel = updatedComponents
+    const updatedComponents = [...components];
+    let currentLevel = updatedComponents;
 
     // Navigate to the correct nesting level except the last index
     for (let i = 0; i < componentPath.length - 1; i++) {
       if (componentPath[i] === "children") {
-        continue // Skip "children" in the path
+        continue; // Skip "children" in the path
       }
       if (i < componentPath.length - 2 && componentPath[i + 1] === "children") {
-        currentLevel = currentLevel[componentPath[i]].children
+        currentLevel = currentLevel[componentPath[i]].children;
       } else {
-        currentLevel = currentLevel[componentPath[i]]
+        currentLevel = currentLevel[componentPath[i]];
       }
     }
 
     // Add to children array of the target container
-    const lastIndex = componentPath[componentPath.length - 1]
+    const lastIndex = componentPath[componentPath.length - 1];
     if (!currentLevel[lastIndex].children) {
-      currentLevel[lastIndex].children = []
+      currentLevel[lastIndex].children = [];
     }
     currentLevel[lastIndex].children.push({
       ...draggedComponent,
       style: { ...draggedComponent.style },
       children: draggedComponent.isContainer ? [] : undefined,
-    })
+    });
 
-    setComponents(updatedComponents)
-  }
+    setComponents(updatedComponents);
+  };
 
   const handleDeleteComponent = (index) => {
-    const updatedComponents = [...components]
-    let currentLevel = updatedComponents
+    const updatedComponents = [...components];
+    let currentLevel = updatedComponents;
 
     // Navigate to the correct nesting level except the last index
     for (let i = 0; i < componentPath.length - 1; i++) {
       if (componentPath[i] === "children") {
-        continue // Skip "children" in the path
+        continue; // Skip "children" in the path
       }
       if (i < componentPath.length - 2 && componentPath[i + 1] === "children") {
-        currentLevel = currentLevel[componentPath[i]].children
+        currentLevel = currentLevel[componentPath[i]].children;
       } else {
-        currentLevel = currentLevel[componentPath[i]]
+        currentLevel = currentLevel[componentPath[i]];
       }
     }
 
     // Remove the child at specified index
-    const lastIndex = componentPath[componentPath.length - 1]
+    const lastIndex = componentPath[componentPath.length - 1];
     if (currentLevel[lastIndex].children) {
-      currentLevel[lastIndex].children.splice(index, 1)
-      setComponents(updatedComponents)
+      currentLevel[lastIndex].children.splice(index, 1);
+      setComponents(updatedComponents);
     }
-  }
+  };
 
   // This will be used by the parent DndContext
-  component.handleDrop = handleDrop
+  component.handleDrop = handleDrop;
 
   const containerStyle = {
     ...component.style,
-  }
+  };
 
   return (
     <div
       ref={setNodeRef}
-      className={`relative transition-all duration-200 ${isOver ? "bg-violet-50 border-violet-300" : "border-dashed border-gray-300"
-        } border`}
+      className={`relative transition-all duration-200 ${
+        isOver
+          ? "bg-violet-50 border-violet-300"
+          : "border-dashed border-gray-300"
+      } border`}
       style={containerStyle}
       onClick={(e) => {
-        e.stopPropagation()
-        setSelectedElement({ path: componentPath, ...component })
+        e.stopPropagation();
+        setSelectedElement({ path: componentPath, ...component });
       }}
     >
       {component.content && (
@@ -311,8 +378,8 @@ function NestedDroppable({ component, componentPath, components, setComponents, 
             />
             <button
               onClick={(e) => {
-                e.stopPropagation()
-                handleDeleteComponent(childIndex)
+                e.stopPropagation();
+                handleDeleteComponent(childIndex);
               }}
               className="absolute top-1 right-1 bg-rose-500 text-white rounded-full w-5 h-5 flex items-center justify-center cursor-pointer text-xs opacity-80 hover:opacity-100"
               aria-label="Delete component"
@@ -323,13 +390,21 @@ function NestedDroppable({ component, componentPath, components, setComponents, 
         ))}
 
       {component.isContainer && component.children.length === 0 && (
-        <div className="text-center py-5 text-slate-500">Drop components here</div>
+        <div className="text-center py-5 text-slate-500">
+          Drop components here
+        </div>
       )}
     </div>
-  )
+  );
 }
 
-function RenderComponent({ component, componentPath, components, setComponents, setSelectedElement }) {
+function RenderComponent({
+  component,
+  componentPath,
+  components,
+  setComponents,
+  setSelectedElement,
+}) {
   if (component.isContainer) {
     return (
       <NestedDroppable
@@ -339,43 +414,55 @@ function RenderComponent({ component, componentPath, components, setComponents, 
         setComponents={setComponents}
         setSelectedElement={setSelectedElement}
       />
-    )
+    );
   }
 
   const updateContent = (newContent) => {
-    const updatedComponents = [...components]
-    let currentLevel = updatedComponents
+    const updatedComponents = [...components];
+    let currentLevel = updatedComponents;
 
     // Navigate to the correct nesting level
     for (let i = 0; i < componentPath.length; i++) {
       if (componentPath[i] === "children") {
-        continue
+        continue;
       }
       if (i === componentPath.length - 1) {
-        currentLevel[componentPath[i]].content = newContent
-      } else if (i < componentPath.length - 2 && componentPath[i + 1] === "children") {
-        currentLevel = currentLevel[componentPath[i]].children
+        currentLevel[componentPath[i]].content = newContent;
+      } else if (
+        i < componentPath.length - 2 &&
+        componentPath[i + 1] === "children"
+      ) {
+        currentLevel = currentLevel[componentPath[i]].children;
       } else {
-        currentLevel = currentLevel[componentPath[i]]
+        currentLevel = currentLevel[componentPath[i]];
       }
     }
 
-    setComponents(updatedComponents)
-  }
+    setComponents(updatedComponents);
+  };
 
-  const ComponentType = component.type
+  const ComponentType = component.type;
 
   const props = {
     style: component.style,
     onClick: (e) => {
-      e.stopPropagation()
-      setSelectedElement({ path: componentPath, ...component })
+      e.stopPropagation();
+      setSelectedElement({ path: componentPath, ...component });
     },
-  }
+  };
 
   // Handle special component types
   if (ComponentType === "img") {
-    return <img src={component.src || "https://cdn.pixabay.com/photo/2017/11/10/05/24/add-2935429_1280.png"} alt={component.alt || "Image"} {...props} />
+    return (
+      <img
+        src={
+          component.src ||
+          "https://cdn.pixabay.com/photo/2017/11/10/05/24/add-2935429_1280.png"
+        }
+        alt={component.alt || "Image"}
+        {...props}
+      />
+    );
   } else if (ComponentType === "a") {
     return (
       <a
@@ -385,7 +472,7 @@ function RenderComponent({ component, componentPath, components, setComponents, 
         {...props}
         dangerouslySetInnerHTML={{ __html: component.content }}
       />
-    )
+    );
   }
 
   // Regular components with content
@@ -397,78 +484,86 @@ function RenderComponent({ component, componentPath, components, setComponents, 
       {...props}
       dangerouslySetInnerHTML={{ __html: component.content }}
     />
-  )
+  );
 }
 
 function Canvas({ components, setComponents, setSelectedElement }) {
-  const { setNodeRef, isOver } = useDroppable({ id: "canvas" })
-  const [historyStack, setHistoryStack] = useState([])
-  const [futureStack, setFutureStack] = useState([])
+  const { setNodeRef, isOver } = useDroppable({ id: "canvas" });
+  const [historyStack, setHistoryStack] = useState([]);
+  const [futureStack, setFutureStack] = useState([]);
 
   useEffect(() => {
     // Save current state to history when components change (debounced)
     const debounceTimer = setTimeout(() => {
       if (
         historyStack.length === 0 ||
-        JSON.stringify(historyStack[historyStack.length - 1]) !== JSON.stringify(components)
+        JSON.stringify(historyStack[historyStack.length - 1]) !==
+          JSON.stringify(components)
       ) {
-        setHistoryStack((prev) => [...prev, JSON.parse(JSON.stringify(components))])
-        setFutureStack([])
+        setHistoryStack((prev) => [
+          ...prev,
+          JSON.parse(JSON.stringify(components)),
+        ]);
+        setFutureStack([]);
       }
-    }, 500)
+    }, 500);
 
-    return () => clearTimeout(debounceTimer)
-  }, [components])
+    return () => clearTimeout(debounceTimer);
+  }, [components]);
 
   const handleDeleteComponent = (index) => {
     setComponents((prevComponents) => {
-      const newComponents = [...prevComponents]
-      newComponents.splice(index, 1)
-      return newComponents
-    })
-  }
+      const newComponents = [...prevComponents];
+      newComponents.splice(index, 1);
+      return newComponents;
+    });
+  };
 
   const handleUndo = () => {
     if (historyStack.length > 1) {
-      const newHistoryStack = [...historyStack]
-      const currentState = newHistoryStack.pop()
-      setHistoryStack(newHistoryStack)
-      setFutureStack((prev) => [...prev, currentState])
-      setComponents(newHistoryStack[newHistoryStack.length - 1])
+      const newHistoryStack = [...historyStack];
+      const currentState = newHistoryStack.pop();
+      setHistoryStack(newHistoryStack);
+      setFutureStack((prev) => [...prev, currentState]);
+      setComponents(newHistoryStack[newHistoryStack.length - 1]);
     }
-  }
+  };
 
   const handleRedo = () => {
     if (futureStack.length > 0) {
-      const newFutureStack = [...futureStack]
-      const nextState = newFutureStack.pop()
-      setFutureStack(newFutureStack)
-      setHistoryStack((prev) => [...prev, nextState])
-      setComponents(nextState)
+      const newFutureStack = [...futureStack];
+      const nextState = newFutureStack.pop();
+      setFutureStack(newFutureStack);
+      setHistoryStack((prev) => [...prev, nextState]);
+      setComponents(nextState);
     }
-  }
+  };
 
   return (
     <div className="w-3/5 flex flex-col">
-      <div className="p-3 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 flex gap-2 
-      items-center shadow-sm">
+      <div
+        className="p-3 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200 flex gap-2 
+      items-center shadow-sm"
+      >
         <button
           onClick={handleUndo}
           disabled={historyStack.length <= 1}
-          className={`px-4 py-2 rounded-md font-medium transition-colors ${historyStack.length <= 1
-            ? "opacity-50 cursor-not-allowed bg-slate-200 text-slate-500"
-            : "bg-blue-300 hover:bg-blue-700 hover:text-white text-slate-800 shadow-sm border border-slate-200"
-            }`}
+          className={`px-4 py-2 rounded-md font-medium transition-colors ${
+            historyStack.length <= 1
+              ? "opacity-50 cursor-not-allowed bg-slate-200 text-slate-500"
+              : "bg-blue-300 hover:bg-blue-700 hover:text-white text-slate-800 shadow-sm border border-slate-200"
+          }`}
         >
           Undo
         </button>
         <button
           onClick={handleRedo}
           disabled={futureStack.length === 0}
-          className={`px-4 py-2 rounded-md font-medium transition-colors ${futureStack.length === 0
-            ? "opacity-50 cursor-not-allowed bg-slate-200 text-slate-500"
-            : "bg-emerald-300 hover:bg-emerald-700 hover:text-white text-slate-900 shadow-sm border border-slate-200"
-            }`}
+          className={`px-4 py-2 rounded-md font-medium transition-colors ${
+            futureStack.length === 0
+              ? "opacity-50 cursor-not-allowed bg-slate-200 text-slate-500"
+              : "bg-emerald-300 hover:bg-emerald-700 hover:text-white text-slate-900 shadow-sm border border-slate-200"
+          }`}
         >
           Redo
         </button>
@@ -476,13 +571,18 @@ function Canvas({ components, setComponents, setSelectedElement }) {
 
       <div
         ref={setNodeRef}
-        className={`min-h-[400px] border-2 border-dashed ${isOver ? "border-violet-400 bg-violet-100" : "border-slate-300 bg-slate-50"
-          } p-4 flex flex-col gap-3 overflow-auto flex-1 relative transition-colors duration-200`}
+        className={`min-h-[400px] border-2 border-dashed ${
+          isOver
+            ? "border-violet-400 bg-violet-100"
+            : "border-slate-300 bg-slate-50"
+        } p-4 flex flex-col gap-3 overflow-auto flex-1 relative transition-colors duration-200`}
       >
         {components.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
             <p className="text-lg">Drag elements here to start building</p>
-            <p className="text-sm mt-2">Select components from the left panel</p>
+            <p className="text-sm mt-2">
+              Select components from the left panel
+            </p>
           </div>
         ) : (
           components.map((comp, index) => (
@@ -506,101 +606,113 @@ function Canvas({ components, setComponents, setSelectedElement }) {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 function RightPanel({ selectedElement, setComponents, components }) {
-  const [element, setElement] = useState(selectedElement)
+  const [element, setElement] = useState(selectedElement);
 
   useEffect(() => {
-    setElement(selectedElement)
-  }, [selectedElement])
+    setElement(selectedElement);
+  }, [selectedElement]);
 
   if (!selectedElement)
     return (
       <div className="w-1/5 p-4 border-l border-slate-200 bg-slate-50">
         <div className="text-center py-8">
-          <h3 className="text-lg font-medium text-slate-700 mb-2">Style Editor</h3>
-          <p className="text-slate-500 text-sm">Select an element to edit its properties</p>
+          <h3 className="text-lg font-medium text-slate-700 mb-2">
+            Style Editor
+          </h3>
+          <p className="text-slate-500 text-sm">
+            Select an element to edit its properties
+          </p>
           <div className="mt-6 p-4 border border-dashed border-slate-300 rounded-lg">
             <p className="text-slate-400 text-xs">
-              Click on any element in the canvas to customize its appearance and behavior
+              Click on any element in the canvas to customize its appearance and
+              behavior
             </p>
           </div>
         </div>
       </div>
-    )
+    );
 
   const updateStyle = (property, value) => {
-    const updatedComponents = [...components]
+    const updatedComponents = [...components];
 
-    let currentLevel = updatedComponents
-    const path = selectedElement.path
+    let currentLevel = updatedComponents;
+    const path = selectedElement.path;
 
     for (let i = 0; i < path.length; i++) {
       if (i === path.length - 1) {
-        const currentStyle = currentLevel[path[i]].style || {}
+        const currentStyle = currentLevel[path[i]].style || {};
         currentLevel[path[i]] = {
           ...currentLevel[path[i]], // Ensure immutability
           style: {
             ...currentStyle,
             [property]: value,
           },
-        }
+        };
       } else if (path[i] === "children") {
-        currentLevel = currentLevel.children
+        currentLevel = currentLevel.children;
       } else {
-        currentLevel = currentLevel[path[i]]
+        currentLevel = currentLevel[path[i]];
       }
     }
 
-    setComponents([...updatedComponents]) // Ensure new reference
-    setElement({ ...element, style: { ...element.style, [property]: value } }) // Update local state
-  }
+    setComponents([...updatedComponents]); // Ensure new reference
+    setElement({ ...element, style: { ...element.style, [property]: value } }); // Update local state
+  };
 
   const updateAttribute = (attribute, value) => {
-    const updatedComponents = [...components]
+    const updatedComponents = [...components];
 
-    let currentLevel = updatedComponents
-    const path = selectedElement.path
+    let currentLevel = updatedComponents;
+    const path = selectedElement.path;
 
     for (let i = 0; i < path.length; i++) {
       if (i === path.length - 1) {
-        currentLevel[path[i]][attribute] = value
+        currentLevel[path[i]][attribute] = value;
       } else if (path[i] === "children") {
-        currentLevel = currentLevel.children
+        currentLevel = currentLevel.children;
       } else {
-        currentLevel = currentLevel[path[i]]
+        currentLevel = currentLevel[path[i]];
       }
     }
 
-    setComponents([...updatedComponents]) // Ensure re-render
-    setElement({ ...element, [attribute]: value }) // Update local state
-  }
+    setComponents([...updatedComponents]); // Ensure re-render
+    setElement({ ...element, [attribute]: value }); // Update local state
+  };
 
   // Function to update multiple style properties at once
   const updateMultipleStyles = (styleObject) => {
     Object.entries(styleObject).forEach(([property, value]) => {
       updateStyle(property, value);
     });
-  }
+  };
 
   return (
     <div className="w-1/5 p-4 border-l border-slate-200 bg-slate-50 overflow-y-auto">
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
-        <h3 className="text-lg font-medium text-slate-800 mb-2">Element Properties</h3>
+        <h3 className="text-lg font-medium text-slate-800 mb-2">
+          Element Properties
+        </h3>
         <div className="p-2 bg-slate-50 rounded-md border border-slate-200">
           <label className="font-medium text-slate-700 block mb-1">
-            Type: <span className="font-normal text-slate-500">{element?.type}</span>
+            Type:{" "}
+            <span className="font-normal text-slate-500">{element?.type}</span>
           </label>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
-        <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Text Styles</h4>
+        <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">
+          Text Styles
+        </h4>
         <div className="space-y-4">
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Text Color: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Text Color:{" "}
+            </label>
             <input
               type="color"
               onChange={(e) => updateStyle("color", e.target.value)}
@@ -610,7 +722,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Font Size: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Font Size:{" "}
+            </label>
             <div className="flex items-center">
               <input
                 type="range"
@@ -627,7 +741,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Font Weight: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Font Weight:{" "}
+            </label>
             <select
               onChange={(e) => updateStyle("fontWeight", e.target.value)}
               value={element?.style?.fontWeight || "normal"}
@@ -647,7 +763,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Font Family */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Font Family: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Font Family:{" "}
+            </label>
             <select
               onChange={(e) => updateStyle("fontFamily", e.target.value)}
               value={element?.style?.fontFamily || "inherit"}
@@ -668,7 +786,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Text Transform */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Text Transform: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Text Transform:{" "}
+            </label>
             <select
               onChange={(e) => updateStyle("textTransform", e.target.value)}
               value={element?.style?.textTransform || "none"}
@@ -683,14 +803,18 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Line Height */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Line Height: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Line Height:{" "}
+            </label>
             <div className="flex items-center">
               <input
                 type="range"
                 min="100"
                 max="300"
                 step="10"
-                onChange={(e) => updateStyle("lineHeight", `${e.target.value}%`)}
+                onChange={(e) =>
+                  updateStyle("lineHeight", `${e.target.value}%`)
+                }
                 value={Number.parseInt(element?.style?.lineHeight) || 150}
                 className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
               />
@@ -702,14 +826,18 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Letter Spacing */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Letter Spacing: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Letter Spacing:{" "}
+            </label>
             <div className="flex items-center">
               <input
                 type="range"
                 min="-3"
                 max="10"
                 step="0.5"
-                onChange={(e) => updateStyle("letterSpacing", `${e.target.value}px`)}
+                onChange={(e) =>
+                  updateStyle("letterSpacing", `${e.target.value}px`)
+                }
                 value={Number.parseFloat(element?.style?.letterSpacing) || 0}
                 className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
               />
@@ -721,7 +849,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Text Decoration */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Text Decoration: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Text Decoration:{" "}
+            </label>
             <select
               onChange={(e) => updateStyle("textDecoration", e.target.value)}
               value={element?.style?.textDecoration || "none"}
@@ -736,7 +866,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Text Shadow */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Text Shadow: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Text Shadow:{" "}
+            </label>
             <select
               onChange={(e) => updateStyle("textShadow", e.target.value)}
               value={element?.style?.textShadow || "none"}
@@ -753,35 +885,42 @@ function RightPanel({ selectedElement, setComponents, components }) {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
-        <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Layout</h4>
+        <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">
+          Layout
+        </h4>
         <div className="space-y-4">
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Text Align: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Text Align:{" "}
+            </label>
             <div className="grid grid-cols-3 gap-1">
               <button
                 onClick={() => updateStyle("textAlign", "left")}
-                className={`p-2 border ${element?.style?.textAlign === "left"
-                  ? "bg-violet-100 border-violet-300 text-violet-700"
-                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${
+                  element?.style?.textAlign === "left"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                } rounded text-sm font-medium transition-colors`}
               >
                 Left
               </button>
               <button
                 onClick={() => updateStyle("textAlign", "center")}
-                className={`p-2 border ${element?.style?.textAlign === "center"
-                  ? "bg-violet-100 border-violet-300 text-violet-700"
-                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${
+                  element?.style?.textAlign === "center"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                } rounded text-sm font-medium transition-colors`}
               >
                 Center
               </button>
               <button
                 onClick={() => updateStyle("textAlign", "right")}
-                className={`p-2 border ${element?.style?.textAlign === "right"
-                  ? "bg-violet-100 border-violet-300 text-violet-700"
-                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${
+                  element?.style?.textAlign === "right"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                } rounded text-sm font-medium transition-colors`}
               >
                 Right
               </button>
@@ -789,32 +928,37 @@ function RightPanel({ selectedElement, setComponents, components }) {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Display Type:</label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Display Type:
+            </label>
             <div className="grid grid-cols-3 gap-1">
               <button
                 onClick={() => updateStyle("display", "block")}
-                className={`p-2 border ${element?.style?.display === "block"
-                  ? "bg-violet-100 border-violet-300 text-violet-700"
-                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${
+                  element?.style?.display === "block"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                } rounded text-sm font-medium transition-colors`}
               >
                 Block
               </button>
               <button
                 onClick={() => updateStyle("display", "inline")}
-                className={`p-2 border ${element?.style?.display === "inline"
-                  ? "bg-violet-100 border-violet-300 text-violet-700"
-                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${
+                  element?.style?.display === "inline"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                } rounded text-sm font-medium transition-colors`}
               >
                 Inline
               </button>
               <button
                 onClick={() => updateStyle("display", "flex")}
-                className={`p-2 border ${element?.style?.display === "flex"
-                  ? "bg-violet-100 border-violet-300 text-violet-700"
-                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${
+                  element?.style?.display === "flex"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                } rounded text-sm font-medium transition-colors`}
               >
                 Flex
               </button>
@@ -824,23 +968,28 @@ function RightPanel({ selectedElement, setComponents, components }) {
           {/* Show Flex direction when display is Flex */}
           {element?.style?.display === "flex" && (
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Flex Direction:</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Flex Direction:
+              </label>
               <div className="grid grid-cols-2 gap-1">
                 <button
                   onClick={() => updateStyle("flexDirection", "row")}
-                  className={`p-2 border ${element?.style?.flexDirection === "row" || !element?.style?.flexDirection
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                    } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${
+                    element?.style?.flexDirection === "row" ||
+                    !element?.style?.flexDirection
+                      ? "bg-violet-100 border-violet-300 text-violet-700"
+                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
                 >
                   Row
                 </button>
                 <button
                   onClick={() => updateStyle("flexDirection", "column")}
-                  className={`p-2 border ${element?.style?.flexDirection === "column"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                    } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${
+                    element?.style?.flexDirection === "column"
+                      ? "bg-violet-100 border-violet-300 text-violet-700"
+                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
                 >
                   Column
                 </button>
@@ -851,41 +1000,47 @@ function RightPanel({ selectedElement, setComponents, components }) {
           {/* Show Justify Content options only when display is Flex */}
           {element?.style?.display === "flex" && (
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Justify Content:</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Justify Content:
+              </label>
               <div className="grid grid-cols-2 gap-1">
                 <button
                   onClick={() => updateStyle("justifyContent", "flex-start")}
-                  className={`p-2 border ${element?.style?.justifyContent === "flex-start"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                    } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${
+                    element?.style?.justifyContent === "flex-start"
+                      ? "bg-violet-100 border-violet-300 text-violet-700"
+                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
                 >
                   Start
                 </button>
                 <button
                   onClick={() => updateStyle("justifyContent", "center")}
-                  className={`p-2 border ${element?.style?.justifyContent === "center"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                    } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${
+                    element?.style?.justifyContent === "center"
+                      ? "bg-violet-100 border-violet-300 text-violet-700"
+                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
                 >
                   Center
                 </button>
                 <button
                   onClick={() => updateStyle("justifyContent", "flex-end")}
-                  className={`p-2 border ${element?.style?.justifyContent === "flex-end"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                    } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${
+                    element?.style?.justifyContent === "flex-end"
+                      ? "bg-violet-100 border-violet-300 text-violet-700"
+                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
                 >
                   End
                 </button>
                 <button
                   onClick={() => updateStyle("justifyContent", "space-between")}
-                  className={`p-2 border ${element?.style?.justifyContent === "space-between"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                    } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${
+                    element?.style?.justifyContent === "space-between"
+                      ? "bg-violet-100 border-violet-300 text-violet-700"
+                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
                 >
                   Space Between
                 </button>
@@ -896,41 +1051,47 @@ function RightPanel({ selectedElement, setComponents, components }) {
           {/* NEW: Align Items options when display is Flex */}
           {element?.style?.display === "flex" && (
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Align Items:</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Align Items:
+              </label>
               <div className="grid grid-cols-2 gap-1">
                 <button
                   onClick={() => updateStyle("alignItems", "flex-start")}
-                  className={`p-2 border ${element?.style?.alignItems === "flex-start"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                    } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${
+                    element?.style?.alignItems === "flex-start"
+                      ? "bg-violet-100 border-violet-300 text-violet-700"
+                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
                 >
                   Start
                 </button>
                 <button
                   onClick={() => updateStyle("alignItems", "center")}
-                  className={`p-2 border ${element?.style?.alignItems === "center"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                    } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${
+                    element?.style?.alignItems === "center"
+                      ? "bg-violet-100 border-violet-300 text-violet-700"
+                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
                 >
                   Center
                 </button>
                 <button
                   onClick={() => updateStyle("alignItems", "flex-end")}
-                  className={`p-2 border ${element?.style?.alignItems === "flex-end"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                    } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${
+                    element?.style?.alignItems === "flex-end"
+                      ? "bg-violet-100 border-violet-300 text-violet-700"
+                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
                 >
                   End
                 </button>
                 <button
                   onClick={() => updateStyle("alignItems", "stretch")}
-                  className={`p-2 border ${element?.style?.alignItems === "stretch"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                    } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${
+                    element?.style?.alignItems === "stretch"
+                      ? "bg-violet-100 border-violet-300 text-violet-700"
+                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
                 >
                   Stretch
                 </button>
@@ -941,7 +1102,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
           {/* NEW: Gap for Flex containers */}
           {element?.style?.display === "flex" && (
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Gap: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Gap:{" "}
+              </label>
               <div className="flex items-center">
                 <input
                   type="range"
@@ -960,7 +1123,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Position */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Position: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Position:{" "}
+            </label>
             <select
               onChange={(e) => updateStyle("position", e.target.value)}
               value={element?.style?.position || "static"}
@@ -975,74 +1140,87 @@ function RightPanel({ selectedElement, setComponents, components }) {
           </div>
 
           {/* Show positioning options when position is not static */}
-          {element?.style?.position && element?.style?.position !== "static" && (
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block mb-1 text-sm font-medium text-slate-700">Top: </label>
-                <div className="flex">
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    onChange={(e) => updateStyle("marginBottom", `${e.target.value}px`)}
-                    value={Number.parseInt(element?.style?.marginBottom) || 0}
-                    className="w-full p-1 border border-slate-300 rounded text-sm"
-                    style={{
-                      backgroundColor: "#f5f3ff",
-                        }}
-                  />
+          {element?.style?.position &&
+            element?.style?.position !== "static" && (
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-slate-700">
+                    Top:{" "}
+                  </label>
+                  <div className="flex">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      onChange={(e) =>
+                        updateStyle("marginBottom", `${e.target.value}px`)
+                      }
+                      value={Number.parseInt(element?.style?.marginBottom) || 0}
+                      className="w-full p-1 border border-slate-300 rounded text-sm"
+                      style={{
+                        backgroundColor: "#f5f3ff",
+                      }}
+                    />
 
-
-                  
-
-                  <span className="ml-1 bg-violet-100 p-2 rounded">px</span>
+                    <span className="ml-1 bg-violet-100 p-2 rounded">px</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block mb-1 text-sm font-medium text-slate-700">
+                    Left:{" "}
+                  </label>
+                  <div className="flex">
+                    <input
+                      type="number"
+                      onChange={(e) =>
+                        updateStyle("left", `${e.target.value}px`)
+                      }
+                      value={Number.parseInt(element?.style?.left) || 0}
+                      className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+                      style={{
+                        backgroundColor: "#f5f3ff",
+                      }}
+                    />
+                    <span className="ml-1 bg-violet-100 p-2 rounded">px</span>
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium text-slate-700">Left: </label>
-                <div className="flex">
-                  <input
-                    type="number"
-                    onChange={(e) => updateStyle("left", `${e.target.value}px`)}
-                    value={Number.parseInt(element?.style?.left) || 0}
-                    className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
-                    style={{
-                      backgroundColor: "#f5f3ff",
-                        }}
-                  />
-                  <span className="ml-1 bg-violet-100 p-2 rounded">px</span>
-                </div>
-              </div>
-            </div>
-          )}
+            )}
 
           {/* NEW: Z-Index */}
-          {element?.style?.position && element?.style?.position !== "static" && (
-            <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Z-Index: </label>
-              <div className="flex items-center">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  onChange={(e) => updateStyle("zIndex", e.target.value)}
-                  value={Number.parseInt(element?.style?.zIndex) || 0}
-                  className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
-                />
-                <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
-                  {Number.parseInt(element?.style?.zIndex) || 0}
-                </span>
+          {element?.style?.position &&
+            element?.style?.position !== "static" && (
+              <div>
+                <label className="block mb-1 text-sm font-medium text-slate-700">
+                  Z-Index:{" "}
+                </label>
+                <div className="flex items-center">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    onChange={(e) => updateStyle("zIndex", e.target.value)}
+                    value={Number.parseInt(element?.style?.zIndex) || 0}
+                    className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                  />
+                  <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
+                    {Number.parseInt(element?.style?.zIndex) || 0}
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
-        <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Box Styles</h4>
+        <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">
+          Box Styles
+        </h4>
         <div className="space-y-4">
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Background: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Background:{" "}
+            </label>
             <input
               type="color"
               onChange={(e) => updateStyle("background", e.target.value)}
@@ -1053,7 +1231,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Background Opacity */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Background Opacity: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Background Opacity:{" "}
+            </label>
             <div className="flex items-center">
               <input
                 type="range"
@@ -1064,31 +1244,46 @@ function RightPanel({ selectedElement, setComponents, components }) {
                   let bgColor = element?.style?.background || "#FFFFFF";
 
                   // Check if background is already in rgba format
-                  if (bgColor.startsWith('rgba')) {
+                  if (bgColor.startsWith("rgba")) {
                     // Replace the opacity value in the rgba string
-                    bgColor = bgColor.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)/,
-                      `rgba($1, $2, $3, ${opacity})`);
+                    bgColor = bgColor.replace(
+                      /rgba$$(\d+),\s*(\d+),\s*(\d+),\s*[\d.]+$$/,
+                      `rgba($1, $2, $3, ${opacity})`
+                    );
                   }
                   // Check if background is in hex format
-                  else if (bgColor.startsWith('#')) {
+                  else if (bgColor.startsWith("#")) {
                     // Convert hex to rgba
-                    const r = parseInt(bgColor.slice(1, 3), 16);
-                    const g = parseInt(bgColor.slice(3, 5), 16);
-                    const b = parseInt(bgColor.slice(5, 7), 16);
+                    const r = Number.parseInt(bgColor.slice(1, 3), 16);
+                    const g = Number.parseInt(bgColor.slice(3, 5), 16);
+                    const b = Number.parseInt(bgColor.slice(5, 7), 16);
                     bgColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
                   }
 
                   updateStyle("background", bgColor);
                 }}
-                value={(element?.style?.background?.startsWith('rgba') ?
-                  parseFloat(element.style.background.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/)[4]) * 100 :
-                  100)}
+                value={
+                  element?.style?.background?.startsWith("rgba")
+                    ? Number.parseFloat(
+                        element.style.background.match(
+                          /rgba$$(\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)$$/
+                        )[4]
+                      ) * 100
+                    : 100
+                }
                 className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
               />
               <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
-                {element?.style?.background?.startsWith('rgba') ?
-                  Math.round(parseFloat(element.style.background.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/)[4]) * 100) :
-                  100}%
+                {element?.style?.background?.startsWith("rgba")
+                  ? Math.round(
+                      Number.parseFloat(
+                        element.style.background.match(
+                          /rgba$$(\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)$$/
+                        )[4]
+                      ) * 100
+                    )
+                  : 100}
+                %
               </span>
             </div>
           </div>
@@ -1100,52 +1295,64 @@ function RightPanel({ selectedElement, setComponents, components }) {
               type="text"
               placeholder="https://example.com/image.jpg"
               onChange={(e) => updateStyle("backgroundImage", e.target.value ? `url(${e.target.value})` : 'none')}
-              value={element?.style?.backgroundImage?.replace(/url\(['"]?(.*?)['"]?\)/i, '$1') || ''}
+              value={element?.style?.backgroundImage?.replace(/url$$['"]?(.*?)['"]?$$/i, '$1') || ''}
               className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
             />
           </div> */}
 
           {/* NEW: Background Position */}
-          {element?.style?.backgroundImage && element?.style?.backgroundImage !== 'none' && (
-            <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Background Position: </label>
-              <select
-                onChange={(e) => updateStyle("backgroundPosition", e.target.value)}
-                value={element?.style?.backgroundPosition || "center"}
-                className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
-              >
-                <option value="center">Center</option>
-                <option value="top">Top</option>
-                <option value="bottom">Bottom</option>
-                <option value="left">Left</option>
-                <option value="right">Right</option>
-                <option value="top left">Top Left</option>
-                <option value="top right">Top Right</option>
-                <option value="bottom left">Bottom Left</option>
-                <option value="bottom right">Bottom Right</option>
-              </select>
-            </div>
-          )}
+          {element?.style?.backgroundImage &&
+            element?.style?.backgroundImage !== "none" && (
+              <div>
+                <label className="block mb-1 text-sm font-medium text-slate-700">
+                  Background Position:{" "}
+                </label>
+                <select
+                  onChange={(e) =>
+                    updateStyle("backgroundPosition", e.target.value)
+                  }
+                  value={element?.style?.backgroundPosition || "center"}
+                  className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+                >
+                  <option value="center">Center</option>
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                  <option value="top left">Top Left</option>
+                  <option value="top right">Top Right</option>
+                  <option value="bottom left">Bottom Left</option>
+                  <option value="bottom right">Bottom Right</option>
+                </select>
+              </div>
+            )}
 
           {/* NEW: Background Size */}
-          {element?.style?.backgroundImage && element?.style?.backgroundImage !== 'none' && (
-            <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Background Size: </label>
-              <select
-                onChange={(e) => updateStyle("backgroundSize", e.target.value)}
-                value={element?.style?.backgroundSize || "cover"}
-                className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
-              >
-                <option value="cover">Cover</option>
-                <option value="contain">Contain</option>
-                <option value="100%">100%</option>
-                <option value="auto">Auto</option>
-              </select>
-            </div>
-          )}
+          {element?.style?.backgroundImage &&
+            element?.style?.backgroundImage !== "none" && (
+              <div>
+                <label className="block mb-1 text-sm font-medium text-slate-700">
+                  Background Size:{" "}
+                </label>
+                <select
+                  onChange={(e) =>
+                    updateStyle("backgroundSize", e.target.value)
+                  }
+                  value={element?.style?.backgroundSize || "cover"}
+                  className="w-full p-2 border border-slate-300 rounded bg-white text-sm"
+                >
+                  <option value="cover">Cover</option>
+                  <option value="contain">Contain</option>
+                  <option value="100%">100%</option>
+                  <option value="auto">Auto</option>
+                </select>
+              </div>
+            )}
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Padding: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Padding:{" "}
+            </label>
             <div className="flex items-center">
               <input
                 type="range"
@@ -1154,7 +1361,6 @@ function RightPanel({ selectedElement, setComponents, components }) {
                 onChange={(e) => updateStyle("padding", `${e.target.value}px`)}
                 value={Number.parseInt(element?.style?.padding) || 0}
                 className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
-
               />
               <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
                 {Number.parseInt(element?.style?.padding) || 0}px
@@ -1164,69 +1370,97 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Individual Padding Controls */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Padding (Individual): </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Padding (Individual):{" "}
+            </label>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Top:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Top:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("paddingTop", `${e.target.value}px`)}
+                    onChange={(e) =>
+                      updateStyle("paddingTop", `${e.target.value}px`)
+                    }
                     value={Number.parseInt(element?.style?.paddingTop) || 0}
                     className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
                   />
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Right:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Right:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("paddingRight", `${e.target.value}px`)}
+                    onChange={(e) =>
+                      updateStyle("paddingRight", `${e.target.value}px`)
+                    }
                     value={Number.parseInt(element?.style?.paddingRight) || 0}
                     className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
                   />
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Bottom:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Bottom:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("paddingBottom", `${e.target.value}px`)}
+                    onChange={(e) =>
+                      updateStyle("paddingBottom", `${e.target.value}px`)
+                    }
                     value={Number.parseInt(element?.style?.paddingBottom) || 0}
                     className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
                   />
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Left:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Left:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("paddingLeft", `${e.target.value}px`)}
+                    onChange={(e) =>
+                      updateStyle("paddingLeft", `${e.target.value}px`)
+                    }
                     value={Number.parseInt(element?.style?.paddingLeft) || 0}
                     className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
                   />
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Margin: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Margin:{" "}
+            </label>
             <div className="flex items-center">
               <input
                 type="range"
@@ -1235,7 +1469,6 @@ function RightPanel({ selectedElement, setComponents, components }) {
                 onChange={(e) => updateStyle("margin", `${e.target.value}px`)}
                 value={Number.parseInt(element?.style?.margin) || 0}
                 className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
-
               />
               <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
                 {Number.parseInt(element?.style?.margin) || 0}px
@@ -1245,92 +1478,120 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Individual Margin Controls */}
           <div>
-            <label className="block mb-1  font-medium text-slate-700">Margin (Individual): </label>
+            <label className="block mb-1  font-medium text-slate-700">
+              Margin (Individual):{" "}
+            </label>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Top:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Top:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("marginTop", `${e.target.value}px`)}
+                    onChange={(e) =>
+                      updateStyle("marginTop", `${e.target.value}px`)
+                    }
                     value={Number.parseInt(element?.style?.marginTop) || 0}
                     className="w-full p-1 border border-slate-300 rounded bg-red-500 text-sm"
                     style={{
                       backgroundColor: "#f5f3ff",
-                        }}
+                    }}
                   />
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Right:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Right:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("marginRight", `${e.target.value}px`)}
+                    onChange={(e) =>
+                      updateStyle("marginRight", `${e.target.value}px`)
+                    }
                     value={Number.parseInt(element?.style?.marginRight) || 0}
                     className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
                     style={{
                       backgroundColor: "#f5f3ff",
-                        }}   
+                    }}
                   />
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Bottom:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Bottom:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("marginBottom", `${e.target.value}px`)}
+                    onChange={(e) =>
+                      updateStyle("marginBottom", `${e.target.value}px`)
+                    }
                     value={Number.parseInt(element?.style?.marginBottom) || 0}
                     className="w-full p-1 border border-slate-300 rounded bg-black text-white text-sm"
                     style={{
                       backgroundColor: "#f5f3ff",
-                        }}
+                    }}
                   />
 
-
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Left:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Left:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("marginLeft", `${e.target.value}px`)}
+                    onChange={(e) =>
+                      updateStyle("marginLeft", `${e.target.value}px`)
+                    }
                     value={Number.parseInt(element?.style?.marginLeft) || 0}
                     className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
                     style={{
                       backgroundColor: "#f5f3ff",
-                        }}
+                    }}
                   />
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Border Radius: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Border Radius:{" "}
+            </label>
             <div className="flex items-center">
               <input
                 type="range"
                 min="0"
                 max="50"
-                onChange={(e) => updateStyle("borderRadius", `${e.target.value}px`)}
+                onChange={(e) =>
+                  updateStyle("borderRadius", `${e.target.value}px`)
+                }
                 value={Number.parseInt(element?.style?.borderRadius) || 0}
                 className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
-                       
               />
               <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
                 {Number.parseInt(element?.style?.borderRadius) || 0}px
@@ -1340,81 +1601,126 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Individual Border Radius Controls */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Border Radius (Individual): </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Border Radius (Individual):{" "}
+            </label>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Top Left:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Top Left:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("borderTopLeftRadius", `${e.target.value}px`)}
-                    value={Number.parseInt(element?.style?.borderTopLeftRadius) || 0}
+                    onChange={(e) =>
+                      updateStyle("borderTopLeftRadius", `${e.target.value}px`)
+                    }
+                    value={
+                      Number.parseInt(element?.style?.borderTopLeftRadius) || 0
+                    }
                     className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
                     style={{
                       backgroundColor: "#f5f3ff",
-                        }}
+                    }}
                   />
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Top Right:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Top Right:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("borderTopRightRadius", `${e.target.value}px`)}
-                    value={Number.parseInt(element?.style?.borderTopRightRadius) || 0}
+                    onChange={(e) =>
+                      updateStyle("borderTopRightRadius", `${e.target.value}px`)
+                    }
+                    value={
+                      Number.parseInt(element?.style?.borderTopRightRadius) || 0
+                    }
                     className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
                     style={{
                       backgroundColor: "#f5f3ff",
-                        }}
+                    }}
                   />
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Bottom Left:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Bottom Left:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("borderBottomLeftRadius", `${e.target.value}px`)}
-                    value={Number.parseInt(element?.style?.borderBottomLeftRadius) || 0}
+                    onChange={(e) =>
+                      updateStyle(
+                        "borderBottomLeftRadius",
+                        `${e.target.value}px`
+                      )
+                    }
+                    value={
+                      Number.parseInt(element?.style?.borderBottomLeftRadius) ||
+                      0
+                    }
                     className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
                     style={{
                       backgroundColor: "#f5f3ff",
-                        }}
+                    }}
                   />
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
               <div>
-                <label className="block mb-1 text-xs text-slate-600">Bottom Right:</label>
+                <label className="block mb-1 text-xs text-slate-600">
+                  Bottom Right:
+                </label>
                 <div className="flex">
                   <input
                     type="number"
                     min="0"
                     max="100"
-                    onChange={(e) => updateStyle("borderBottomRightRadius", `${e.target.value}px`)}
-                    value={Number.parseInt(element?.style?.borderBottomRightRadius) || 0}
+                    onChange={(e) =>
+                      updateStyle(
+                        "borderBottomRightRadius",
+                        `${e.target.value}px`
+                      )
+                    }
+                    value={
+                      Number.parseInt(
+                        element?.style?.borderBottomRightRadius
+                      ) || 0
+                    }
                     className="w-full p-1 border border-slate-300 rounded bg-white text-sm"
                     style={{
                       backgroundColor: "#f5f3ff",
-                        }}
+                    }}
                   />
-                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">px</span>
+                  <span className="ml-1 bg-violet-100 p-1 text-xs rounded">
+                    px
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Border: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Border:{" "}
+            </label>
             <select
               onChange={(e) => updateStyle("border", e.target.value)}
               value={element?.style?.border || "none"}
@@ -1431,16 +1737,21 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Border Color */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Border Color: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Border Color:{" "}
+            </label>
             <input
               type="color"
               onChange={(e) => {
                 // If there's already a border, replace its color
-                if (element?.style?.border && element?.style?.border !== "none") {
-                  const borderParts = element.style.border.split(' ');
+                if (
+                  element?.style?.border &&
+                  element?.style?.border !== "none"
+                ) {
+                  const borderParts = element.style.border.split(" ");
                   if (borderParts.length >= 3) {
                     borderParts[2] = e.target.value;
-                    updateStyle("border", borderParts.join(' '));
+                    updateStyle("border", borderParts.join(" "));
                   } else {
                     // If border format is unexpected, just set new border with the color
                     updateStyle("border", `1px solid ${e.target.value}`);
@@ -1450,14 +1761,16 @@ function RightPanel({ selectedElement, setComponents, components }) {
                   updateStyle("border", `1px solid ${e.target.value}`);
                 }
               }}
-              value={element?.style?.border?.split(' ')[2] || "#000000"}
+              value={element?.style?.border?.split(" ")[2] || "#000000"}
               className="w-full h-8 rounded-md border border-slate-900 shadow-sm cursor-pointer"
             />
           </div>
 
           {/* NEW: Box Shadow */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Box Shadow: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Box Shadow:{" "}
+            </label>
             <select
               onChange={(e) => updateStyle("boxShadow", e.target.value)}
               value={element?.style?.boxShadow || "none"}
@@ -1467,17 +1780,27 @@ function RightPanel({ selectedElement, setComponents, components }) {
               <option value="0 1px 3px rgba(0,0,0,0.12)">Light</option>
               <option value="0 4px 6px rgba(0,0,0,0.1)">Medium</option>
               <option value="0 10px 15px -3px rgba(0,0,0,0.1)">Large</option>
-              <option value="0 20px 25px -5px rgba(0,0,0,0.1)">Extra Large</option>
+              <option value="0 20px 25px -5px rgba(0,0,0,0.1)">
+                Extra Large
+              </option>
               <option value="0 0 15px rgba(0,0,0,0.1)">Soft Glow</option>
-              <option value="rgba(0, 0, 0, 0.16) 0px 1px 4px, rgba(0, 0, 0, 0.1) 0px 0px 0px 3px">Outline</option>
-              <option value="rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px">Layered</option>
-              <option value="rgba(0, 0, 0, 0.07) 0px 1px 2px, rgba(0, 0, 0, 0.07) 0px 2px 4px, rgba(0, 0, 0, 0.07) 0px 4px 8px, rgba(0, 0, 0, 0.07) 0px 8px 16px">Stacked</option>
+              <option value="rgba(0, 0, 0, 0.16) 0px 1px 4px, rgba(0, 0, 0, 0.1) 0px 0px 0px 3px">
+                Outline
+              </option>
+              <option value="rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px">
+                Layered
+              </option>
+              <option value="rgba(0, 0, 0, 0.07) 0px 1px 2px, rgba(0, 0, 0, 0.07) 0px 2px 4px, rgba(0, 0, 0, 0.07) 0px 4px 8px, rgba(0, 0, 0, 0.07) 0px 8px 16px">
+                Stacked
+              </option>
             </select>
           </div>
 
           {/* NEW: Opacity */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Opacity: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Opacity:{" "}
+            </label>
             <div className="flex items-center">
               <input
                 type="range"
@@ -1495,7 +1818,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
           {/* NEW: Overflow */}
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Overflow: </label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">
+              Overflow:{" "}
+            </label>
             <select
               onChange={(e) => updateStyle("overflow", e.target.value)}
               value={element?.style?.overflow || "visible"}
@@ -1512,10 +1837,14 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
       {element?.type === "a" && (
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
-          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Link Settings</h4>
+          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">
+            Link Settings
+          </h4>
           <div className="space-y-4">
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">URL: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                URL:{" "}
+              </label>
               <input
                 type="text"
                 onChange={(e) => updateAttribute("href", e.target.value)}
@@ -1524,7 +1853,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Opens in: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Opens in:{" "}
+              </label>
               <select
                 onChange={(e) => updateAttribute("target", e.target.value)}
                 value={element?.target || "_self"}
@@ -1540,10 +1871,14 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
       {element?.type === "img" && (
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
-          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Image Settings</h4>
+          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">
+            Image Settings
+          </h4>
           <div className="space-y-4">
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Image URL: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Image URL:{" "}
+              </label>
               <input
                 type="text"
                 onChange={(e) => updateAttribute("src", e.target.value)}
@@ -1552,7 +1887,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Alt Text: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Alt Text:{" "}
+              </label>
               <input
                 type="text"
                 onChange={(e) => updateAttribute("alt", e.target.value)}
@@ -1563,7 +1900,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
             {/* NEW: Object Fit */}
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Object Fit: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Object Fit:{" "}
+              </label>
               <select
                 onChange={(e) => updateStyle("objectFit", e.target.value)}
                 value={element?.style?.objectFit || "fill"}
@@ -1579,7 +1918,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
             {/* NEW: Object Position */}
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Object Position: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Object Position:{" "}
+              </label>
               <select
                 onChange={(e) => updateStyle("objectPosition", e.target.value)}
                 value={element?.style?.objectPosition || "center"}
@@ -1602,10 +1943,14 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
       {element?.isContainer && (
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
-          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Container Settings</h4>
+          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">
+            Container Settings
+          </h4>
           <div className="space-y-4">
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Width: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Width:{" "}
+              </label>
               <div className="flex items-center">
                 <input
                   type="range"
@@ -1614,7 +1959,6 @@ function RightPanel({ selectedElement, setComponents, components }) {
                   onChange={(e) => updateStyle("width", `${e.target.value}%`)}
                   value={Number.parseInt(element?.style?.width) || 100}
                   className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
-
                 />
                 <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
                   {Number.parseInt(element?.style?.width) || 100}%
@@ -1623,16 +1967,19 @@ function RightPanel({ selectedElement, setComponents, components }) {
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Min Height: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Min Height:{" "}
+              </label>
               <div className="flex items-center">
                 <input
                   type="range"
                   min="50"
                   max="500"
-                  onChange={(e) => updateStyle("minHeight", `${e.target.value}px`)}
+                  onChange={(e) =>
+                    updateStyle("minHeight", `${e.target.value}px`)
+                  }
                   value={Number.parseInt(element?.style?.minHeight) || 100}
                   className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
-
                 />
                 <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
                   {Number.parseInt(element?.style?.minHeight) || 100}px
@@ -1642,38 +1989,64 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
             {/* NEW: Max Width */}
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Max Width: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Max Width:{" "}
+              </label>
               <div className="flex items-center">
                 <input
                   type="range"
                   min="0"
                   max="1200"
                   step="50"
-                  onChange={(e) => updateStyle("maxWidth", e.target.value === "0" ? "none" : `${e.target.value}px`)}
-                  value={element?.style?.maxWidth === "none" ? 0 : Number.parseInt(element?.style?.maxWidth) || 0}
+                  onChange={(e) =>
+                    updateStyle(
+                      "maxWidth",
+                      e.target.value === "0" ? "none" : `${e.target.value}px`
+                    )
+                  }
+                  value={
+                    element?.style?.maxWidth === "none"
+                      ? 0
+                      : Number.parseInt(element?.style?.maxWidth) || 0
+                  }
                   className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
                 />
                 <span className="ml-3 min-w-[50px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
-                  {element?.style?.maxWidth === "none" ? "None" : `${Number.parseInt(element?.style?.maxWidth) || 0}px`}
+                  {element?.style?.maxWidth === "none"
+                    ? "None"
+                    : `${Number.parseInt(element?.style?.maxWidth) || 0}px`}
                 </span>
               </div>
             </div>
 
             {/* NEW: Max Height */}
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Max Height: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Max Height:{" "}
+              </label>
               <div className="flex items-center">
                 <input
                   type="range"
                   min="0"
                   max="1000"
                   step="50"
-                  onChange={(e) => updateStyle("maxHeight", e.target.value === "0" ? "none" : `${e.target.value}px`)}
-                  value={element?.style?.maxHeight === "none" ? 0 : Number.parseInt(element?.style?.maxHeight) || 0}
+                  onChange={(e) =>
+                    updateStyle(
+                      "maxHeight",
+                      e.target.value === "0" ? "none" : `${e.target.value}px`
+                    )
+                  }
+                  value={
+                    element?.style?.maxHeight === "none"
+                      ? 0
+                      : Number.parseInt(element?.style?.maxHeight) || 0
+                  }
                   className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
                 />
                 <span className="ml-3 min-w-[50px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
-                  {element?.style?.maxHeight === "none" ? "None" : `${Number.parseInt(element?.style?.maxHeight) || 0}px`}
+                  {element?.style?.maxHeight === "none"
+                    ? "None"
+                    : `${Number.parseInt(element?.style?.maxHeight) || 0}px`}
                 </span>
               </div>
             </div>
@@ -1683,17 +2056,23 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
       {element?.type === "button" && (
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-4">
-          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">Button Settings</h4>
+          <h4 className="font-medium text-slate-800 mb-3 pb-2 border-b border-slate-200">
+            Button Settings
+          </h4>
           <div className="space-y-4">
             {/* Button Text Size */}
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Text Size: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Text Size:{" "}
+              </label>
               <div className="flex items-center">
                 <input
                   type="range"
                   min="12"
                   max="24"
-                  onChange={(e) => updateStyle("fontSize", `${e.target.value}px`)}
+                  onChange={(e) =>
+                    updateStyle("fontSize", `${e.target.value}px`)
+                  }
                   value={Number.parseInt(element?.style?.fontSize) || 16}
                   className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
                 />
@@ -1705,7 +2084,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
             {/* Button Padding */}
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Padding: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Padding:{" "}
+              </label>
               <div className="flex items-center">
                 <input
                   type="range"
@@ -1713,26 +2094,40 @@ function RightPanel({ selectedElement, setComponents, components }) {
                   max="20"
                   onChange={(e) => {
                     const value = e.target.value;
-                    updateStyle("padding", `${Math.floor(value / 2)}px ${value}px`);
+                    updateStyle(
+                      "padding",
+                      `${Math.floor(value / 2)}px ${value}px`
+                    );
                   }}
-                  value={Number.parseInt((element?.style?.padding || "10px 20px").split(" ")[1]) || 20}
+                  value={
+                    Number.parseInt(
+                      (element?.style?.padding || "10px 20px").split(" ")[1]
+                    ) || 20
+                  }
                   className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
                 />
                 <span className="ml-3 min-w-[60px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
-                  {Number.parseInt((element?.style?.padding || "10px 20px").split(" ")[1]) || 20}px
+                  {Number.parseInt(
+                    (element?.style?.padding || "10px 20px").split(" ")[1]
+                  ) || 20}
+                  px
                 </span>
               </div>
             </div>
 
             {/* Border Radius */}
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Border Radius: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Border Radius:{" "}
+              </label>
               <div className="flex items-center">
                 <input
                   type="range"
                   min="0"
                   max="24"
-                  onChange={(e) => updateStyle("borderRadius", `${e.target.value}px`)}
+                  onChange={(e) =>
+                    updateStyle("borderRadius", `${e.target.value}px`)
+                  }
                   value={Number.parseInt(element?.style?.borderRadius) || 4}
                   className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
                 />
@@ -1744,7 +2139,9 @@ function RightPanel({ selectedElement, setComponents, components }) {
 
             {/* Cursor Type */}
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Cursor: </label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">
+                Cursor:{" "}
+              </label>
               <select
                 onChange={(e) => updateStyle("cursor", e.target.value)}
                 value={element?.style?.cursor || "pointer"}
@@ -1755,45 +2152,46 @@ function RightPanel({ selectedElement, setComponents, components }) {
                 <option value="not-allowed">Not Allowed</option>
               </select>
             </div>
-
-
-
-
           </div>
         </div>
       )}
 
-
-      <div className="h-16">
-        
-          </div>
+      <div className="h-16"></div>
     </div>
-  )
+  );
 }
 
 function PreviewModal({ components, isOpen, setIsOpen }) {
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const renderComponentToHTML = (comp) => {
     const styleStr = Object.entries(comp.style || {})
       .map(([key, value]) => `${key}: ${value};`)
-      .join(" ")
+      .join(" ");
 
     // Handle self-closing tags
     if (comp.closing === 0) {
-      return `<${comp.type} style="${styleStr}" ${comp.src ? `src="${comp.src}"` : ""} ${comp.alt ? `alt="${comp.alt}"` : ""} />`
+      return `<${comp.type} style="${styleStr}" ${
+        comp.src ? `src="${comp.src}"` : ""
+      } ${comp.alt ? `alt="${comp.alt}"` : ""} />`;
     }
 
     // Handle container with children
-    let childrenHTML = ""
+    let childrenHTML = "";
     if (comp.children && comp.children.length > 0) {
-      childrenHTML = comp.children.map((child) => renderComponentToHTML(child)).join("")
+      childrenHTML = comp.children
+        .map((child) => renderComponentToHTML(child))
+        .join("");
     }
 
-    return `<${comp.type} style="${styleStr}" ${comp.href ? `href="${comp.href}"` : ""}>${comp.content || ""}${childrenHTML}</${comp.type}>`
-  }
+    return `<${comp.type} style="${styleStr}" ${
+      comp.href ? `href="${comp.href}"` : ""
+    }>${comp.content || ""}${childrenHTML}</${comp.type}>`;
+  };
 
-  const htmlOutput = components.map((comp) => renderComponentToHTML(comp)).join("")
+  const htmlOutput = components
+    .map((comp) => renderComponentToHTML(comp))
+    .join("");
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
@@ -1811,13 +2209,13 @@ function PreviewModal({ components, isOpen, setIsOpen }) {
         <div className="flex gap-5 mb-5">
           <button
             onClick={() => {
-              const blob = new Blob([htmlOutput], { type: "text/html" })
-              const url = URL.createObjectURL(blob)
-              const a = document.createElement("a")
-              a.href = url
-              a.download = "page.html"
-              a.click()
-              URL.revokeObjectURL(url)
+              const blob = new Blob([htmlOutput], { type: "text/html" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "page.html";
+              a.click();
+              URL.revokeObjectURL(url);
             }}
             className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none rounded-lg cursor-pointer hover:from-emerald-600 hover:to-emerald-700 transition-colors shadow-md font-medium"
           >
@@ -1826,14 +2224,14 @@ function PreviewModal({ components, isOpen, setIsOpen }) {
 
           <button
             onClick={() => {
-              const jsonStr = JSON.stringify(components, null, 2)
-              const blob = new Blob([jsonStr], { type: "application/json" })
-              const url = URL.createObjectURL(blob)
-              const a = document.createElement("a")
-              a.href = url
-              a.download = "components.json"
-              a.click()
-              URL.revokeObjectURL(url)
+              const jsonStr = JSON.stringify(components, null, 2);
+              const blob = new Blob([jsonStr], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "components.json";
+              a.click();
+              URL.revokeObjectURL(url);
             }}
             className="px-5 py-2.5 bg-gradient-to-r from-violet-500 to-violet-600 text-white border-none rounded-lg cursor-pointer hover:from-violet-600 hover:to-violet-700 transition-colors shadow-md font-medium"
           >
@@ -1846,44 +2244,62 @@ function PreviewModal({ components, isOpen, setIsOpen }) {
         </div>
 
         <div className="mt-5 p-4 bg-slate-50 rounded-lg max-h-[200px] overflow-auto border border-slate-200">
-          <h3 className="text-lg font-medium mb-2.5 text-slate-800">HTML Output</h3>
+          <h3 className="text-lg font-medium mb-2.5 text-slate-800">
+            HTML Output
+          </h3>
           <pre className="whitespace-pre-wrap text-xs bg-violet-100 p-3 rounded border border-slate-200 overflow-x-auto">
             {htmlOutput}
           </pre>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function CodeExportModal({ components, isOpen, setIsOpen }) {
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const generateReactCode = () => {
-    const imports = `import React from 'react';\n\n`
+    const imports = `import React from 'react';\n\n`;
 
     const renderComponentToJSX = (comp, indent = 0) => {
-      const indentStr = " ".repeat(indent * 2)
+      const indentStr = " ".repeat(indent * 2);
       const styleObj = JSON.stringify(comp.style || {}, null, 2)
         .replace(/"/g, "")
-        .replace(/,\n/g, ",\n" + indentStr + "  ")
+        .replace(/,\n/g, ",\n" + indentStr + "  ");
 
       // Handle self-closing tags
       if (comp.closing === 0) {
-        return `${indentStr}<${comp.type}\n${indentStr}  style={${styleObj}}\n${indentStr}  ${comp.src ? `src="${comp.src}"` : ""}\n${indentStr}  ${comp.alt ? `alt="${comp.alt}"` : ""}\n${indentStr}/>`
+        return `${indentStr}<${
+          comp.type
+        }\n${indentStr}  style={${styleObj}}\n${indentStr}  ${
+          comp.src ? `src="${comp.src}"` : ""
+        }\n${indentStr}  ${
+          comp.alt ? `alt="${comp.alt}"` : ""
+        }\n${indentStr}/>`;
       }
 
       // Handle container with children
-      let childrenJSX = ""
+      let childrenJSX = "";
       if (comp.children && comp.children.length > 0) {
-        childrenJSX = comp.children.map((child) => renderComponentToJSX(child, indent + 1)).join("\n")
-        return `${indentStr}<${comp.type} style={${styleObj}} ${comp.href ? `href="${comp.href}"` : ""}>\n${comp.content ? `${indentStr}  ${comp.content}\n` : ""}${childrenJSX}\n${indentStr}</${comp.type}>`
+        childrenJSX = comp.children
+          .map((child) => renderComponentToJSX(child, indent + 1))
+          .join("\n");
+        return `${indentStr}<${comp.type} style={${styleObj}} ${
+          comp.href ? `href="${comp.href}"` : ""
+        }>\n${
+          comp.content ? `${indentStr}  ${comp.content}\n` : ""
+        }${childrenJSX}\n${indentStr}</${comp.type}>`;
       }
 
-      return `${indentStr}<${comp.type} style={${styleObj}} ${comp.href ? `href="${comp.href}"` : ""}>${comp.content || ""}</${comp.type}>`
-    }
+      return `${indentStr}<${comp.type} style={${styleObj}} ${
+        comp.href ? `href="${comp.href}"` : ""
+      }>${comp.content || ""}</${comp.type}>`;
+    };
 
-    const componentJSX = components.map((comp) => renderComponentToJSX(comp)).join("\n")
+    const componentJSX = components
+      .map((comp) => renderComponentToJSX(comp))
+      .join("\n");
 
     return `${imports}export default function GeneratedComponent() {
   return (
@@ -1891,10 +2307,10 @@ function CodeExportModal({ components, isOpen, setIsOpen }) {
 ${componentJSX}
     </div>
   );
-}`
-  }
+}`;
+  };
 
-  const reactCode = generateReactCode()
+  const reactCode = generateReactCode();
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
@@ -1907,18 +2323,20 @@ ${componentJSX}
           <X className="h-5 w-5" />
         </button>
 
-        <h2 className="text-2xl font-bold mb-5 text-slate-800">Export React Code</h2>
+        <h2 className="text-2xl font-bold mb-5 text-slate-800">
+          Export React Code
+        </h2>
 
         <div className="flex gap-5 mb-5">
           <button
             onClick={() => {
-              const blob = new Blob([reactCode], { type: "text/javascript" })
-              const url = URL.createObjectURL(blob)
-              const a = document.createElement("a")
-              a.href = url
-              a.download = "GeneratedComponent.jsx"
-              a.click()
-              URL.revokeObjectURL(url)
+              const blob = new Blob([reactCode], { type: "text/javascript" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "GeneratedComponent.jsx";
+              a.click();
+              URL.revokeObjectURL(url);
             }}
             className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none rounded-lg cursor-pointer hover:from-emerald-600 hover:to-emerald-700 transition-colors shadow-md font-medium"
           >
@@ -1927,8 +2345,8 @@ ${componentJSX}
 
           <button
             onClick={() => {
-              navigator.clipboard.writeText(reactCode)
-              alert("Code copied to clipboard!")
+              navigator.clipboard.writeText(reactCode);
+              alert("Code copied to clipboard!");
             }}
             className="px-5 py-2.5 bg-gradient-to-r from-violet-500 to-violet-600 text-white border-none rounded-lg cursor-pointer hover:from-violet-600 hover:to-violet-700 transition-colors shadow-md font-medium"
           >
@@ -1941,48 +2359,44 @@ ${componentJSX}
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default function PageBuilder({ onLogout }) {
-  const [components, setComponents] = useState([])
-  const [selectedElement, setSelectedElement] = useState(null)
-  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
-  const [isCodeExportModalOpen, setIsCodeExportModalOpen] = useState(false)
-  const [userData, setUserData] = useState(null)
-
-
+  const [components, setComponents] = useState([]);
+  const [selectedElement, setSelectedElement] = useState(null);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [isCodeExportModalOpen, setIsCodeExportModalOpen] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     // Check if user is authenticated
-    const storedUserData = localStorage.getItem("userData")
+    const storedUserData = localStorage.getItem("userData");
 
     if (storedUserData) {
-      setUserData(JSON.parse(storedUserData))
+      setUserData(JSON.parse(storedUserData));
     }
-
-  }, [])
-
-
-
+  }, []);
 
   const handleMenuAction = (action) => {
     if (action === "logout") {
-      onLogout()
+      onLogout();
     } else if (action === "profile") {
       // Navigate to profile page
     } else if (action === "settings") {
       // Navigate to settings page
     }
-  }
+  };
   const handleDragEnd = (event) => {
-    const { active, over } = event
+    const { active, over } = event;
 
-    if (!over) return
+    if (!over) return;
 
     if (over.id === "canvas") {
       // Find the component in the componentsList
-      const draggedComponentTemplate = componentsList.find((comp) => comp.id === active.id)
+      const draggedComponentTemplate = componentsList.find(
+        (comp) => comp.id === active.id
+      );
 
       if (draggedComponentTemplate) {
         // Create a new instance of the component
@@ -1990,36 +2404,41 @@ export default function PageBuilder({ onLogout }) {
           ...draggedComponentTemplate,
           style: { ...draggedComponentTemplate.style },
           children: draggedComponentTemplate.isContainer ? [] : undefined,
-        }
+        };
 
         // Add to the components array
-        setComponents((prevComponents) => [...prevComponents, newComponent])
+        setComponents((prevComponents) => [...prevComponents, newComponent]);
       }
     } else if (over.id.startsWith("droppable-")) {
       // Handle dropping into a nested container
-      const draggedComponentTemplate = componentsList.find((comp) => comp.id === active.id)
+      const draggedComponentTemplate = componentsList.find(
+        (comp) => comp.id === active.id
+      );
 
       if (draggedComponentTemplate) {
         // Find the target container
-        const pathParts = over.id.replace("droppable-", "").split("-")
-        let currentLevel = components
-        let targetContainer = null
-        const targetPath = []
+        const pathParts = over.id.replace("droppable-", "").split("-");
+        let currentLevel = components;
+        let targetContainer = null;
+        const targetPath = [];
 
         for (let i = 0; i < pathParts.length; i++) {
-          const part = pathParts[i]
-          if (part === "children") continue
+          const part = pathParts[i];
+          if (part === "children") continue;
 
-          const index = Number.parseInt(part)
-          targetPath.push(index)
+          const index = Number.parseInt(part);
+          targetPath.push(index);
 
           if (i === pathParts.length - 1) {
-            targetContainer = currentLevel[index]
-          } else if (i < pathParts.length - 2 && pathParts[i + 1] === "children") {
-            currentLevel = currentLevel[index].children
-            targetPath.push("children")
+            targetContainer = currentLevel[index];
+          } else if (
+            i < pathParts.length - 2 &&
+            pathParts[i + 1] === "children"
+          ) {
+            currentLevel = currentLevel[index].children;
+            targetPath.push("children");
           } else {
-            currentLevel = currentLevel[index]
+            currentLevel = currentLevel[index];
           }
         }
 
@@ -2029,71 +2448,91 @@ export default function PageBuilder({ onLogout }) {
             ...draggedComponentTemplate,
             style: { ...draggedComponentTemplate.style },
             children: draggedComponentTemplate.isContainer ? [] : undefined,
-          }
+          };
 
           // Update the components state
-          const updatedComponents = [...components]
-          let current = updatedComponents
+          const updatedComponents = [...components];
+          let current = updatedComponents;
 
           for (let i = 0; i < targetPath.length; i++) {
             if (targetPath[i] === "children") {
-              continue
+              continue;
             }
             if (i === targetPath.length - 1) {
               if (!current[targetPath[i]].children) {
-                current[targetPath[i]].children = []
+                current[targetPath[i]].children = [];
               }
-              current[targetPath[i]].children.push(newComponent)
-            } else if (i < targetPath.length - 2 && targetPath[i + 1] === "children") {
-              current = current[targetPath[i]].children
+              current[targetPath[i]].children.push(newComponent);
+            } else if (
+              i < targetPath.length - 2 &&
+              targetPath[i + 1] === "children"
+            ) {
+              current = current[targetPath[i]].children;
             } else {
-              current = current[targetPath[i]]
+              current = current[targetPath[i]];
             }
           }
 
-          setComponents(updatedComponents)
+          setComponents(updatedComponents);
         }
       }
     }
-  }
+  };
 
   return (
     <div>
-     <Navigation userData={userData} onMenuAction={handleMenuAction} />
+      <Navigation userData={userData} onMenuAction={handleMenuAction} />
 
-    <DndContext onDragEnd={handleDragEnd}>
-      <div className="flex h-screen overflow-hidden bg-slate-50">
-        <div className="w-1/5 p-4 border-r border-slate-200 overflow-y-auto bg-white shadow-md">
-          <h2 className="text-xl font-bold mb-4 text-slate-800 pb-2 border-b border-slate-200">Components</h2>
-          <ComponentCategoryList categories={componentCategories} />
+      <DndContext onDragEnd={handleDragEnd}>
+        <div className="flex h-screen overflow-hidden bg-slate-50">
+          <div className="w-1/5 p-4 border-r border-slate-200 overflow-y-auto bg-white shadow-md">
+            <h2 className="text-xl font-bold mb-4 text-slate-800 pb-2 border-b border-slate-200">
+              Components
+            </h2>
+            <ComponentCategoryList categories={componentCategories} />
+          </div>
+
+          <Canvas
+            components={components}
+            setComponents={setComponents}
+            setSelectedElement={setSelectedElement}
+          />
+
+          <RightPanel
+            selectedElement={selectedElement}
+            setComponents={setComponents}
+            components={components}
+          />
+
+          <div className="fixed bottom-6 right-6 flex gap-3 z-10">
+            <button
+              onClick={() => setIsPreviewModalOpen(true)}
+              className="px-5 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none rounded-lg cursor-pointer shadow-lg hover:from-emerald-600 hover:to-emerald-700 transition-colors font-medium"
+            >
+              Preview
+            </button>
+
+            <button
+              onClick={() => setIsCodeExportModalOpen(true)}
+              className="px-5 py-3 bg-gradient-to-r from-violet-500 to-violet-600 text-white border-none rounded-lg cursor-pointer shadow-lg hover:from-violet-600 hover:to-violet-700 transition-colors font-medium"
+            >
+              Export Code
+            </button>
+          </div>
         </div>
 
-        <Canvas components={components} setComponents={setComponents} setSelectedElement={setSelectedElement} />
+        <PreviewModal
+          components={components}
+          isOpen={isPreviewModalOpen}
+          setIsOpen={setIsPreviewModalOpen}
+        />
 
-        <RightPanel selectedElement={selectedElement} setComponents={setComponents} components={components} />
-
-        <div className="fixed bottom-6 right-6 flex gap-3 z-10">
-          <button
-            onClick={() => setIsPreviewModalOpen(true)}
-            className="px-5 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none rounded-lg cursor-pointer shadow-lg hover:from-emerald-600 hover:to-emerald-700 transition-colors font-medium"
-          >
-            Preview
-          </button>
-
-          <button
-            onClick={() => setIsCodeExportModalOpen(true)}
-            className="px-5 py-3 bg-gradient-to-r from-violet-500 to-violet-600 text-white border-none rounded-lg cursor-pointer shadow-lg hover:from-violet-600 hover:to-violet-700 transition-colors font-medium"
-          >
-            Export Code
-          </button>
-        </div>
-      </div>
-
-      <PreviewModal components={components} isOpen={isPreviewModalOpen} setIsOpen={setIsPreviewModalOpen} />
-
-      <CodeExportModal components={components} isOpen={isCodeExportModalOpen} setIsOpen={setIsCodeExportModalOpen} />
-    </DndContext>
+        <CodeExportModal
+          components={components}
+          isOpen={isCodeExportModalOpen}
+          setIsOpen={setIsCodeExportModalOpen}
+        />
+      </DndContext>
     </div>
-    
-  )
+  );
 }
