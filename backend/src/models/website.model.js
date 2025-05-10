@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const WebsiteSchema = new mongoose.Schema({
     sourcecode:{
-        type: String,
+        type: Array,
         required: true,
         default: ""
     }
