@@ -8,6 +8,7 @@ import asyncHandler from "../utils/AsyncHandler.utils.js"
 const createUser = asyncHandler(async (req, res) => {
     
         try {
+            console.log("Create user request received")
             const {username, password, email} = req.body
             if (username.trim() === "" || password.trim() === "" || email.trim() === "") {
                 throw new ApiError(400, "Please provide all required fields")
@@ -51,12 +52,12 @@ const createUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     try {
+        console.log("Login request received")
         const {username, password} = req.body
         if (!username || !password) {
             throw new ApiError(400, "Please provide all required fields")
         }
         const user=await User.findOne({username})
-        console.log(user)
         if (!user) {
             throw new ApiError(401, "Invalid username or password")
         }
@@ -99,10 +100,36 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 })
 
+ const logoutUser = asyncHandler(async (req, res) => {
+    try {
+        console.log("Logout request received")
+        const username = req.user.username
+        const user = await User.findOne({username})
+        if (!user) {
+            throw new ApiError(401, "User not found")
+        }
+        user.refreshToken = null
+        await user.save()
+        res.status(200).clearCookie("refreshToken").
+        clearCookie("accessToken").
+        json(
+            new ApiResponse(200, "Logout successful",
+                {message: "Logout successful"}
+            )
+        )
+        
+    } catch (error) {
+        if (error.statusCode === undefined) {
+            error.statusCode = 500
+        }
+        return res.status(error.statusCode).json(
+            new ApiError(500, "Unable to logout user",error)
+        )
+    }
+});
 
 
-
-export {loginUser, createUser}
+export {loginUser, createUser,logoutUser}
 
 
     
