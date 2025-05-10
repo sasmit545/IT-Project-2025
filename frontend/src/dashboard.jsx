@@ -16,10 +16,16 @@ export default function Dashboard({ onLogout }) {
     const storedUserData = localStorage.getItem("userData")
 
     if (storedUserData) {
-      setUserData(JSON.parse(storedUserData))
+      const userData = JSON.parse(storedUserData);
+      setUserData(userData);
+    } else {
+      // If no user data is found, redirect to login
+      navigate("/");
+      return;
     }
 
-    // Simulate fetching projects
+    // Fetch projects from API (to be implemented later)
+    // For now, we'll use mock data
     setTimeout(() => {
       setProjects([
         {
@@ -47,11 +53,46 @@ export default function Dashboard({ onLogout }) {
 
   const handleMenuAction = (action) => {
     if (action === "logout") {
-      onLogout()
+      logoutUser();
     } else if (action === "profile") {
-      // Navigate to profile page
-    } else if (action === "settings") {
-      // Navigate to settings page
+      // Handle profile action
+    }
+  }
+  const logoutUser = async () => {
+    setIsLoading(true);
+    try {
+      const apiUrl = "http://localhost:8000/api/v1";
+      
+      // Get the stored access token from localStorage
+      const userData = JSON.parse(localStorage.getItem("userData"));
+      const accessToken = userData?.accessToken;
+      
+      const response = await fetch(`${apiUrl}/user/logout`, {
+        method: 'POST',
+        credentials: 'include', // Important for handling cookies
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': accessToken ? `Bearer ${accessToken}` : ''
+        }
+      });
+      console.log(response);
+
+      // Clear user data regardless of response
+      localStorage.removeItem("userData");
+      
+      // Call the onLogout callback from parent
+      onLogout();
+      
+      // Redirect to login page
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Still clear data and redirect even if API call fails
+      localStorage.removeItem("userData");
+      onLogout();
+      navigate("/");
+    } finally {
+      setIsLoading(false);
     }
   }
 
