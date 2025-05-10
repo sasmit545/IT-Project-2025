@@ -439,9 +439,9 @@ export default function AuthForm({ onAuthentication }) {
                   </div>
                 </div>
               
-                <button type="submit" className="submit-btn" disabled={isLoading}></button>
+                <button type="submit" className="submit-btn" disabled={isLoading}>
                   {isLoading ? "Creating account..." : "Create Account"}
-                
+                </button>
               </form>
             </div>
           )}
