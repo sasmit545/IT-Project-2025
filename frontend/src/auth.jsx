@@ -66,16 +66,40 @@ export default function AuthForm({ onAuthentication }) {
     setError("")
     setIsLoading(true)
 
-    // For demo purposes, we'll simulate a successful login
-    setTimeout(() => {
-      // Store mock token and user data
-      localStorage.setItem("userToken", "demo-token-12345")
-      localStorage.setItem("userData", JSON.stringify({ username: loginData.username }))
+    try {
+      const apiUrl = 'http://localhost:8000/api/v1';
+      
+      const formData = new FormData();
+      formData.append('username', loginData.username);
+      formData.append('password', loginData.password);
+      
+      const response = await fetch(`${apiUrl}/user/login`, {
+        method: 'POST',
+        credentials: 'include', // Important for handling cookies
+        body: formData
+      });
 
-      onAuthentication(true)
-      navigate("/dashboard")
-      setIsLoading(false)
-    }, 1500)
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+        // Store user data in localStorage including tokens for authorization
+      localStorage.setItem("userData", JSON.stringify({ 
+        username: loginData.username,
+        accessToken: data.data.accessToken,
+        refreshToken: data.data.refreshToken
+        // Additional user data from response as needed
+      }));
+      
+      // Notify parent component of successful authentication
+      onAuthentication(true);
+      navigate("/dashboard");
+    } catch (error) {
+      setError(error.message || 'An error occurred during login');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleRegisterSubmit = async (e) => {
@@ -83,26 +107,44 @@ export default function AuthForm({ onAuthentication }) {
     setError("")
     setIsLoading(true)
 
-    // For demo purposes, we'll simulate a successful registration
-    setTimeout(() => {
-      setRegisterData({ username: "", email: "", password: "" })
-      setActiveTab("login")
-      setError("")
+    try {
+      const apiUrl = 'http://localhost:8000/api/v1';;
+      
+      const formData = new FormData();
+      formData.append('username', registerData.username);
+      formData.append('email', registerData.email);
+      formData.append('password', registerData.password);
+      
+      const response = await fetch(`${apiUrl}/user/register`, {
+        method: 'POST',
+        body: formData
+      });
 
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+      
+      setRegisterData({ username: "", email: "", password: "" });
+      setActiveTab("login");
+      
       // Show success message
-      const successMessage = document.createElement("div")
-      successMessage.className = "success-message"
-      successMessage.textContent = "Registration successful! Please log in with your credentials."
-      document.querySelector(".auth-card").prepend(successMessage)
+      const successMessage = document.createElement("div");
+      successMessage.className = "success-message";
+      successMessage.textContent = "Registration successful! Please log in with your credentials.";
+      document.querySelector(".auth-card").prepend(successMessage);
 
       setTimeout(() => {
         if (successMessage.parentNode) {
-          successMessage.parentNode.removeChild(successMessage)
+          successMessage.parentNode.removeChild(successMessage);
         }
-      }, 5000)
-
-      setIsLoading(false)
-    }, 1500)
+      }, 5000);
+    } catch (error) {
+      setError(error.message || 'An error occurred during registration');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -396,7 +438,7 @@ export default function AuthForm({ onAuthentication }) {
                     />
                   </div>
                 </div>
-
+              
                 <button type="submit" className="submit-btn" disabled={isLoading}>
                   {isLoading ? "Creating account..." : "Create Account"}
                 </button>
