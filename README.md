@@ -10,7 +10,7 @@
 
 ### Editor Interface
 
-![Editor](https://res.cloudinary.com/dfgoyoeml/image/upload/v1746971897/qlxma0n0mnenbni9wq3p.png)
+![Editor]((https://res.cloudinary.com/dfgoyoeml/image/upload/v1746972919/aajqsii0amtnnwsmljpt.png))
 
 ### Dashboard
 
