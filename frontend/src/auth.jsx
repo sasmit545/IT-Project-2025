@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import "./auth.css"
+import axios from "axios"
 
 export default function AuthForm({ onAuthentication }) {
   const [activeTab, setActiveTab] = useState("login")
@@ -65,87 +66,70 @@ export default function AuthForm({ onAuthentication }) {
     e.preventDefault()
     setError("")
     setIsLoading(true)
-
+    const loginUrl = "http://localhost:8000/api/v1/user/login"
     try {
-      const apiUrl = 'https://it-project-2025.onrender.com/api/v1';
-      
-      const formData = new FormData();
-      formData.append('username', loginData.username);
-      formData.append('password', loginData.password);
-      
-      const response = await fetch(`${apiUrl}/user/login`, {
-        method: 'POST',
-        credentials: 'include', // Important for handling cookies
-        body: formData
-      });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-        // Store user data in localStorage including tokens for authorization
-      localStorage.setItem("userData", JSON.stringify({ 
-        username: loginData.username,
-        accessToken: data.data.accessToken,
-        refreshToken: data.data.refreshToken
-        // Additional user data from response as needed
-      }));
-      
-      // Notify parent component of successful authentication
-      onAuthentication(true);
-      navigate("/dashboard");
+        const resp= await axios.post(loginUrl, loginData, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        console.log(resp)
+
+        if (resp.status === 200) {
+        console.log(resp.data.message)
+        localStorage.setItem("userRefreshToken", resp.data.message.refreshToken)
+        localStorage.setItem("userAccessToken", resp.data.message.accessToken)
+        localStorage.setItem("userData", JSON.stringify({username: loginData.username, email: resp.data.message.email}))
+      onAuthentication(true)
+       navigate("/dashboard")}
+        
     } catch (error) {
-      setError(error.message || 'An error occurred during login');
-    } finally {
-      setIsLoading(false);
+      setError("Invalid username or password")
     }
+    setIsLoading(false)
+    
   }
 
   const handleRegisterSubmit = async (e) => {
+    
     e.preventDefault()
     setError("")
     setIsLoading(true)
-
+    const registerUrl = "http://localhost:8000/api/v1/user/register"
     try {
-      const apiUrl = 'https://it-project-2025.onrender.com/api/v1';;
-      
-      const formData = new FormData();
-      formData.append('username', registerData.username);
-      formData.append('email', registerData.email);
-      formData.append('password', registerData.password);
-      
-      const response = await fetch(`${apiUrl}/user/register`, {
-        method: 'POST',
-        body: formData
-      });
+      const details = await axios.post(registerUrl, registerData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      if (details.status === 201) {
+        console.log(details.data.message)
+        setRegisterData({ username: "", email: "", password: "" })
+        setActiveTab("login")
+        setError("")
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+        // Show success message
+        const successMessage = document.createElement("div")
+        successMessage.className = "success-message"
+        successMessage.textContent = "Registration successful! Please log in with your credentials."
+        document.querySelector(".auth-card").prepend(successMessage)
+        
+        setTimeout(() => {
+          if (successMessage.parentNode) {
+            successMessage.parentNode.removeChild(successMessage)
+          }
+        }, 5000)
       }
-      
-      setRegisterData({ username: "", email: "", password: "" });
-      setActiveTab("login");
-      
-      // Show success message
-      const successMessage = document.createElement("div");
-      successMessage.className = "success-message";
-      successMessage.textContent = "Registration successful! Please log in with your credentials.";
-      document.querySelector(".auth-card").prepend(successMessage);
 
-      setTimeout(() => {
-        if (successMessage.parentNode) {
-          successMessage.parentNode.removeChild(successMessage);
-        }
-      }, 5000);
     } catch (error) {
-      setError(error.message || 'An error occurred during registration');
-    } finally {
-      setIsLoading(false);
+      setError("Registration failed. Please try again.")
+      
     }
-  }
+    setIsLoading(false)
+
+  }
+
 
   return (
     <div className="auth-container">

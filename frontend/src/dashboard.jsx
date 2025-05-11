@@ -1,9 +1,11 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import Navigation from "./components/navigation"
 import "./dashboard.css"
+import axios from "axios"
 
 export default function Dashboard({ onLogout }) {
   const [userData, setUserData] = useState(null)
@@ -13,16 +15,20 @@ export default function Dashboard({ onLogout }) {
 
   useEffect(() => {
     // Check if user is authenticated
-    const storedUserData = localStorage.getItem("userData")
+  const storedUserData = localStorage.getItem("userData");
 
-    if (storedUserData) {
-      const userData = JSON.parse(storedUserData);
-      setUserData(userData);
-    } else {
-      // If no user data is found, redirect to login
+  if (storedUserData && storedUserData !== "undefined") {
+    try {
+      const parsedUserData = JSON.parse(storedUserData);
+      setUserData(parsedUserData);
+    } catch (err) {
+      console.error("Failed to parse user data from localStorage:", err);
+      localStorage.removeItem("userData"); // clear the bad data
       navigate("/");
-      return;
     }
+  } else {
+    navigate("/");
+  }
 
     // Fetch projects from API (to be implemented later)
     // For now, we'll use mock data
@@ -59,42 +65,36 @@ export default function Dashboard({ onLogout }) {
     }
   }
   const logoutUser = async () => {
-    setIsLoading(true);
-    try {
-      const apiUrl = "https://it-project-2025.onrender.com/api/v1";
-      
-      // Get the stored access token from localStorage
-      const userData = JSON.parse(localStorage.getItem("userData"));
-      const accessToken = userData?.accessToken;
-      
-      const response = await fetch(`${apiUrl}/user/logout`, {
-        method: 'POST',
-        credentials: 'include', // Important for handling cookies
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': accessToken ? `Bearer ${accessToken}` : ''
-        }
-      });
-      console.log(response);
+  try {
+    const userAccessToken = localStorage.getItem("userAccessToken")
+    localStorage.clear()
+    
+    // Dispatch custom event to notify App component about auth state change
+    window.dispatchEvent(new Event('authChange'))
 
-      // Clear user data regardless of response
-      localStorage.removeItem("userData");
-      
-      // Call the onLogout callback from parent
-      onLogout();
-      
-      // Redirect to login page
-      navigate("/");
-    } catch (error) {
-      console.error("Logout failed:", error);
-      // Still clear data and redirect even if API call fails
-      localStorage.removeItem("userData");
-      onLogout();
-      navigate("/");
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    const logout = await axios.post(
+      "http://localhost:8000/api/v1/user/logout",
+      {}, // empty request body
+      {
+        headers: {
+          Authorization: `Bearer ${userAccessToken}`,
+        },
+        withCredentials: true, // if using cookies/sessions
+      }
+    );
+
+    console.log("Logout successful:", logout);
+     setUserData(null);
+     localStorage.clear();
+    onLogout(); // Call the logout function passed from App component
+
+    navigate("/auth");
+  } catch (error) {
+    console.error("Logout failed:", error);
+    // Ensure navigation happens even if API call fails
+    navigate("/auth");
+  }
+};
 
   const handleEditProject = (projectId) => {
     navigate("/editor", { state: { projectId } })
