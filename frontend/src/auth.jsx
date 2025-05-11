@@ -67,7 +67,7 @@ export default function AuthForm({ onAuthentication }) {
     setIsLoading(true)
 
     try {
-      const apiUrl = 'http://localhost:8000/api/v1';
+      const apiUrl = 'https://it-project-2025.onrender.com/api/v1';
       
       const formData = new FormData();
       formData.append('username', loginData.username);
@@ -108,7 +108,7 @@ export default function AuthForm({ onAuthentication }) {
     setIsLoading(true)
 
     try {
-      const apiUrl = 'http://localhost:8000/api/v1';;
+      const apiUrl = 'https://it-project-2025.onrender.com/api/v1';;
       
       const formData = new FormData();
       formData.append('username', registerData.username);

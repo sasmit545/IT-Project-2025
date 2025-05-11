@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useEffect } from "react"
-import "./Squares.css"
+import "./squares.css"
 
 const Squares = ({
   direction = "right",

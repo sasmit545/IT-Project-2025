@@ -61,7 +61,7 @@ export default function Dashboard({ onLogout }) {
   const logoutUser = async () => {
     setIsLoading(true);
     try {
-      const apiUrl = "http://localhost:8000/api/v1";
+      const apiUrl = "https://it-project-2025.onrender.com/api/v1";
       
       // Get the stored access token from localStorage
       const userData = JSON.parse(localStorage.getItem("userData"));
