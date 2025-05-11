@@ -6,6 +6,7 @@ import AuthForm from "./auth.jsx"
 import Dashboard from "./dashboard.jsx"
 import LandingPage from "./landing-page.jsx"
 import Editor from "./pages/editor"
+import Template from "./pages/editor/template.jsx"
 import "./App.css"
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
               isAuthenticated ? <Navigate to="/dashboard" /> : <AuthForm onAuthentication={setIsAuthenticated} />
             }
           />
+
           <Route 
             path="/dashboard" 
             element={
@@ -51,6 +53,24 @@ function App() {
             path="/editor" 
             element={
               isAuthenticated ? <Editor onLogout={handleLogout} /> : <Navigate to="/auth" />
+            } 
+          />
+          <Route 
+            path="/template/ecomm" 
+            element={
+              isAuthenticated ? <Template onLogout={handleLogout} type={"ecomm"} /> : <Navigate to="/auth" />
+            } 
+          />
+          <Route 
+            path="/template/saas" 
+            element={
+              isAuthenticated ? <Template onLogout={handleLogout} type={"saas"} /> : <Navigate to="/auth" />
+            } 
+          />
+          <Route 
+            path="/template/marketing" 
+            element={
+              isAuthenticated ? <Template onLogout={handleLogout} type={"marketing"} /> : <Navigate to="/auth" />
             } 
           />
           <Route path="*" element={<Navigate to="/" />} />
