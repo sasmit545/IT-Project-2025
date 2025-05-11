@@ -1,4 +1,4 @@
-# Sitebbuilder  <img src="https://res.cloudinary.com/dfgoyoeml/image/upload/v1746971973/wwvstk5vxklqb4pntxw3.png" alt="Sitebbuilder Logo" width="40" style="vertical-align: middle; margin-left: 10px;">
+# <img src="https://res.cloudinary.com/dfgoyoeml/image/upload/v1746971973/wwvstk5vxklqb4pntxw3.png" alt="Sitebbuilder Logo" width="240" style="vertical-align: middle; margin-left: 10px;">
 
 **Sitebbuilder** is a no-code website builder that empowers users to design and publish professional websites without writing a single line of code. With a drag-and-drop interface, customizable templates, and real-time preview, it provides a seamless and flexible web design experience for both beginners and professionals.
 
@@ -6,7 +6,7 @@
 
 ---
 
-## Screenshots
+## UI
 
 ### Editor Interface
 
@@ -16,13 +16,11 @@
 
 ![Dashboard](https://res.cloudinary.com/dfgoyoeml/image/upload/v1746972068/sveqgod13iha9rwf0o9s.png)
 
-### Templates Page
+### Templates Section
 
 ![Templates](https://res.cloudinary.com/dfgoyoeml/image/upload/v1746972084/mtepahajnjx7mnc6p7b9.png)
 
-### Logo
 
-![Sitebbuilder Logo](https://res.cloudinary.com/dfgoyoeml/image/upload/v1746971973/wwvstk5vxklqb4pntxw3.png)
 
 ---
 
@@ -117,6 +115,4 @@ sitebbuilder/
 ├── .gitignore
 ├── README.md
 ```
-
-
 
