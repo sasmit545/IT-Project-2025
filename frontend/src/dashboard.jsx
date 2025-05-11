@@ -77,7 +77,7 @@ export default function Dashboard({ onLogout }) {
       window.dispatchEvent(new Event("authChange"));
 
       const logout = await axios.post(
-        "http://localhost:8000/api/v1/user/logout",
+        "https://it-project-2025.onrender.com/api/v1/user/logout",
         {}, // empty request body
         {
           headers: {

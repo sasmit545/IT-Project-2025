@@ -1,19 +1,23 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import "./auth.css"
-import axios from "axios"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "./auth.css";
+import axios from "axios";
 
 export default function AuthForm({ onAuthentication }) {
-  const [activeTab, setActiveTab] = useState("login")
-  const [loginData, setLoginData] = useState({ username: "", password: "" })
-  const [registerData, setRegisterData] = useState({ username: "", email: "", password: "" })
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [currentTextIndex, setCurrentTextIndex] = useState(0)
-  const [isMobile, setIsMobile] = useState(false)
-  const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState("login");
+  const [loginData, setLoginData] = useState({ username: "", password: "" });
+  const [registerData, setRegisterData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const navigate = useNavigate();
 
   const dynamicTexts = [
     {
@@ -28,108 +32,112 @@ export default function AuthForm({ onAuthentication }) {
       title: "Your vision, our tools",
       subtitle: "Professional results with minimal effort",
     },
-  ]
+  ];
 
   useEffect(() => {
     // Check if device is mobile
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
+      setIsMobile(window.innerWidth <= 768);
+    };
 
-    checkIfMobile()
-    window.addEventListener("resize", checkIfMobile)
+    checkIfMobile();
+    window.addEventListener("resize", checkIfMobile);
 
     const interval = setInterval(() => {
-      setCurrentTextIndex((prevIndex) => (prevIndex + 1) % dynamicTexts.length)
-    }, 5000)
+      setCurrentTextIndex((prevIndex) => (prevIndex + 1) % dynamicTexts.length);
+    }, 5000);
 
     return () => {
-      clearInterval(interval)
-      window.removeEventListener("resize", checkIfMobile)
-    }
-  }, [])
+      clearInterval(interval);
+      window.removeEventListener("resize", checkIfMobile);
+    };
+  }, []);
 
   const handleTabSwitch = (tab) => {
-    setActiveTab(tab)
-    setError("")
-  }
+    setActiveTab(tab);
+    setError("");
+  };
 
   const handleLoginChange = (e) => {
-    setLoginData({ ...loginData, [e.target.name]: e.target.value })
-  }
+    setLoginData({ ...loginData, [e.target.name]: e.target.value });
+  };
 
   const handleRegisterChange = (e) => {
-    setRegisterData({ ...registerData, [e.target.name]: e.target.value })
-  }
+    setRegisterData({ ...registerData, [e.target.name]: e.target.value });
+  };
 
   const handleLoginSubmit = async (e) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
-    const loginUrl = "http://localhost:8000/api/v1/user/login"
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+    const loginUrl = "https://it-project-2025.onrender.com/api/v1/user/login";
     try {
+      const resp = await axios.post(loginUrl, loginData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(resp);
 
-        const resp= await axios.post(loginUrl, loginData, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        console.log(resp)
-
-        if (resp.status === 200) {
-        console.log(resp.data.message)
-        localStorage.setItem("userRefreshToken", resp.data.message.refreshToken)
-        localStorage.setItem("userAccessToken", resp.data.message.accessToken)
-        localStorage.setItem("userData", JSON.stringify({username: loginData.username, email: resp.data.message.email}))
-      onAuthentication(true)
-       navigate("/dashboard")}
-        
+      if (resp.status === 200) {
+        console.log(resp.data.message);
+        localStorage.setItem(
+          "userRefreshToken",
+          resp.data.message.refreshToken
+        );
+        localStorage.setItem("userAccessToken", resp.data.message.accessToken);
+        localStorage.setItem(
+          "userData",
+          JSON.stringify({
+            username: loginData.username,
+            email: resp.data.message.email,
+          })
+        );
+        onAuthentication(true);
+        navigate("/dashboard");
+      }
     } catch (error) {
-      setError("Invalid username or password")
+      setError("Invalid username or password");
     }
-    setIsLoading(false)
-    
-  }
+    setIsLoading(false);
+  };
 
   const handleRegisterSubmit = async (e) => {
-    
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
-    const registerUrl = "http://localhost:8000/api/v1/user/register"
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+    const registerUrl =
+      "https://it-project-2025.onrender.com/api/v1/user/register";
     try {
       const details = await axios.post(registerUrl, registerData, {
         headers: {
           "Content-Type": "application/json",
         },
-      })
+      });
       if (details.status === 201) {
-        console.log(details.data.message)
-        setRegisterData({ username: "", email: "", password: "" })
-        setActiveTab("login")
-        setError("")
+        console.log(details.data.message);
+        setRegisterData({ username: "", email: "", password: "" });
+        setActiveTab("login");
+        setError("");
 
         // Show success message
-        const successMessage = document.createElement("div")
-        successMessage.className = "success-message"
-        successMessage.textContent = "Registration successful! Please log in with your credentials."
-        document.querySelector(".auth-card").prepend(successMessage)
-        
+        const successMessage = document.createElement("div");
+        successMessage.className = "success-message";
+        successMessage.textContent =
+          "Registration successful! Please log in with your credentials.";
+        document.querySelector(".auth-card").prepend(successMessage);
+
         setTimeout(() => {
           if (successMessage.parentNode) {
-            successMessage.parentNode.removeChild(successMessage)
+            successMessage.parentNode.removeChild(successMessage);
           }
-        }, 5000)
+        }, 5000);
       }
-
     } catch (error) {
-      setError("Registration failed. Please try again.")
-      
+      setError("Registration failed. Please try again.");
     }
-    setIsLoading(false)
-
-  }
-
+    setIsLoading(false);
+  };
 
   return (
     <div className="auth-container">
@@ -144,7 +152,12 @@ export default function AuthForm({ onAuthentication }) {
             </div>
             <div className="dynamic-text-container">
               {dynamicTexts.map((text, index) => (
-                <div key={index} className={`dynamic-text ${currentTextIndex === index ? "active" : ""}`}>
+                <div
+                  key={index}
+                  className={`dynamic-text ${
+                    currentTextIndex === index ? "active" : ""
+                  }`}
+                >
                   <h1>{text.title}</h1>
                   <p>{text.subtitle}</p>
                 </div>
@@ -153,15 +166,21 @@ export default function AuthForm({ onAuthentication }) {
             <div className="features">
               <div className="feature">
                 <div className="feature-icon">✓</div>
-                <div className="feature-text">Intuitive drag-and-drop interface</div>
+                <div className="feature-text">
+                  Intuitive drag-and-drop interface
+                </div>
               </div>
               <div className="feature">
                 <div className="feature-icon">✓</div>
-                <div className="feature-text">Responsive designs that work everywhere</div>
+                <div className="feature-text">
+                  Responsive designs that work everywhere
+                </div>
               </div>
               <div className="feature">
                 <div className="feature-icon">✓</div>
-                <div className="feature-text">Export to HTML or React components</div>
+                <div className="feature-text">
+                  Export to HTML or React components
+                </div>
               </div>
             </div>
           </div>
@@ -180,7 +199,9 @@ export default function AuthForm({ onAuthentication }) {
           )}
 
           <div className="auth-header">
-            <h2>{activeTab === "login" ? "Welcome back" : "Create an account"}</h2>
+            <h2>
+              {activeTab === "login" ? "Welcome back" : "Create an account"}
+            </h2>
             <p>
               {activeTab === "login"
                 ? "Sign in to continue building amazing websites"
@@ -293,7 +314,11 @@ export default function AuthForm({ onAuthentication }) {
                   </div>
                 </div>
 
-                <button type="submit" className="submit-btn" disabled={isLoading}>
+                <button
+                  type="submit"
+                  className="submit-btn"
+                  disabled={isLoading}
+                >
                   {isLoading ? "Signing in..." : "Sign In"}
                 </button>
               </form>
@@ -422,8 +447,12 @@ export default function AuthForm({ onAuthentication }) {
                     />
                   </div>
                 </div>
-              
-                <button type="submit" className="submit-btn" disabled={isLoading}>
+
+                <button
+                  type="submit"
+                  className="submit-btn"
+                  disabled={isLoading}
+                >
                   {isLoading ? "Creating account..." : "Create Account"}
                 </button>
               </form>
@@ -432,12 +461,13 @@ export default function AuthForm({ onAuthentication }) {
 
           <div className="auth-footer">
             <p>
-              By continuing, you agree to our <a href="#terms">Terms of Service</a> and{" "}
+              By continuing, you agree to our{" "}
+              <a href="#terms">Terms of Service</a> and{" "}
               <a href="#privacy">Privacy Policy</a>
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
