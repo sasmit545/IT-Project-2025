@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -14,7 +15,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const token = localStorage.getItem("userToken")
+    const token = localStorage.getItem("userData")
     if (token) {
       setIsAuthenticated(true)
     }

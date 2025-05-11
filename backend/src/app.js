@@ -5,11 +5,22 @@ import dotenv from "dotenv";
 dotenv.config();
 const app = express();
 // Add this for debugging to confirm env is loaded
-console.log("Allowed origin:", process.env.CORS_ORIGIN); 
+//console.log("Allowed origin:", process.env.CORS_ORIGIN); 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://it-project-2025.vercel.app'
+];
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS: ' + origin));
+    }
+  },
+  credentials: true
 }));
 
 app.use(express.json());
