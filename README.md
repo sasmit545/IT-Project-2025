@@ -1,18 +1,38 @@
-# Sitebbuilder
+# Sitebbuilder  <img src="https://res.cloudinary.com/dfgoyoeml/image/upload/v1746971973/wwvstk5vxklqb4pntxw3.png" alt="Sitebbuilder Logo" width="40" style="vertical-align: middle; margin-left: 10px;">
 
-**Sitebbuilder** is a no-code website builder that enables users to design and publish websites without writing any code. Built for both beginners and professionals, it provides a clean drag-and-drop interface, customizable templates, and real-time previews.
+**Sitebbuilder** is a no-code website builder that empowers users to design and publish professional websites without writing a single line of code. With a drag-and-drop interface, customizable templates, and real-time preview, it provides a seamless and flexible web design experience for both beginners and professionals.
 
 **Live Demo**: [https://it-project-2025.vercel.app](https://it-project-2025.vercel.app)
 
 ---
 
+## Screenshots
+
+### Editor Interface
+
+![Editor](https://res.cloudinary.com/dfgoyoeml/image/upload/v1746971897/qlxma0n0mnenbni9wq3p.png)
+
+### Dashboard
+
+![Dashboard](https://res.cloudinary.com/dfgoyoeml/image/upload/v1746972068/sveqgod13iha9rwf0o9s.png)
+
+### Templates Page
+
+![Templates](https://res.cloudinary.com/dfgoyoeml/image/upload/v1746972084/mtepahajnjx7mnc6p7b9.png)
+
+### Logo
+
+![Sitebbuilder Logo](https://res.cloudinary.com/dfgoyoeml/image/upload/v1746971973/wwvstk5vxklqb4pntxw3.png)
+
+---
+
 ## Features
 
-* Drag-and-drop website builder
-* Pre-designed professional templates
-* Fully customizable layout, fonts, and colors
-* Real-time preview of changes
-* Secure user authentication and project management
+* Drag-and-drop builder for intuitive editing
+* Pre-designed templates for fast startup
+* Real-time preview for instant feedback
+* Fully customizable components: layout, fonts, colors
+* Secure login and project management system
 
 ---
 
@@ -21,15 +41,15 @@
 **Frontend**
 
 * React
-* Vercel (Deployment)
+* Deployed on Vercel
 
 **Backend**
 
 * Node.js, Express.js
-* MongoDB Atlas (Database)
-* Cloudinary (Media Storage)
-* JWT & bcryptjs (Authentication)
-* Render (Deployment)
+* MongoDB Atlas (cloud database)
+* bcryptjs and JWT for authentication
+* Cloudinary for media storage
+* Deployed on Render
 
 **Version Control**
 
@@ -41,9 +61,9 @@
 
 ### Prerequisites
 
-* Node.js and npm
+* Node.js and npm installed
 * MongoDB Atlas account
-* Cloudinary account
+* Cloudinary credentials
 
 ---
 
@@ -54,16 +74,16 @@
 git clone https://github.com/your-username/sitebbuilder.git
 cd sitebbuilder
 
-# Setup frontend
+# Frontend setup
 cd frontend
 npm install
 npm run dev
 
-# Setup backend
+# Backend setup
 cd ../backend
 npm install
 npm run dev
-```
+````
 
 ---
 
@@ -84,6 +104,7 @@ PORT=8000
 CORS_ORIGIN=http://localhost:5173
 ```
 
+> Tip: Refer to a `.env.example` file to structure your configuration. Never commit your real `.env` file to version control.
 
 ---
 
@@ -97,4 +118,5 @@ sitebbuilder/
 ├── README.md
 ```
 
----
+
+
