@@ -4,11 +4,21 @@ import {ApiResponse} from "../utils/ApiResponse.utils.js"
 import { uploadCloudinary, deleteFromCloudinary } from "../utils/Cloudinary.utils.js"
 import asyncHandler from "../utils/AsyncHandler.utils.js"
 import Website from "../models/website.model.js"
+import mongoose from "mongoose" 
 
 const openwebsitebyid  = asyncHandler(async (req, res) => {
     try {
         console.log("Open website by id request received")
-        const {websiteid} = req.params
+        let {websiteid} = req.params
+        console.log(websiteid)
+        websiteid = websiteid.replace(/:/g, "")
+        console.log(websiteid)
+        
+        
+        if (!mongoose.isValidObjectId(websiteid)) {
+            throw new ApiError(400, "Invalid website id")
+        }
+        
         if (!websiteid) {
             throw new ApiError(400, "Please provide all required fields")
         }
@@ -22,6 +32,7 @@ const openwebsitebyid  = asyncHandler(async (req, res) => {
             data: website
         })
     } catch (error) {
+        console.log(error)
         if (error.statusCode === undefined) {
             error.statusCode = 500
         }
@@ -38,11 +49,13 @@ const openwebsitebyid  = asyncHandler(async (req, res) => {
 const listAllWebsitesByUserId = asyncHandler(async (req, res) => {
     try {
         console.log("List all websites by user id request received")
-        const {userid} = req.params
+        const userid = req.user._id
         if (!userid) {
             throw new ApiError(400, "Please provide all required fields")
         }
+        console.log(userid)
         const websites=await Website.find({owner:userid}).populate('owner')
+        console.log(websites)
         if (!websites) {
             throw new ApiError(404, "Websites not found")
         }
@@ -99,9 +112,14 @@ const createWebsite = asyncHandler(async (req, res) => {
 const updateWebsite = asyncHandler(async (req, res) => {
     try {
         console.log("Update website request received")
-        const {websiteid} = req.params
+        let {websiteid} = req.params
+        websiteid = websiteid.replace(/:/g, "")
+        
+        console.log(websiteid)
         const {sourcecode, name} = req.body
+
         if (!websiteid || !sourcecode || !name) {
+            console.log("Invalid website id")
             throw new ApiError(400, "Please provide all required fields")
         }
         const website=await Website.findByIdAndUpdate(websiteid, {
@@ -117,6 +135,7 @@ const updateWebsite = asyncHandler(async (req, res) => {
             data: website
         })
     } catch (error) {
+        console.log(error)
         if (error.statusCode === undefined) {
             error.statusCode = 500
         }

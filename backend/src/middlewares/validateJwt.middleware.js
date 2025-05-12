@@ -4,6 +4,7 @@ import asyncHandler from "../utils/AsyncHandler.utils.js";
 import jwt  from "jsonwebtoken";
 const verifyJwt = asyncHandler(async (req, res, next) => {
     try {
+        console.log("JWT verification middleware called")
         // console.log(req.cookies)
         const token = req.cookies.accessToken || req.header("Authorization")?.replace("Bearer ", "")
         // get access token from cookies or the header of the request

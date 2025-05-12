@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useParams ,useNavigate } from "react-router-dom";
 import {
   DndContext,
   useDndContext,
@@ -19,8 +20,9 @@ import {
 } from "react-icons/fa";
 import "./editor.css";
 import Navigation from "../../components/navigation";
+import axios from "axios";
 
-// Components definition
+
 const componentsList = [
   {
     id: "text",
@@ -552,11 +554,10 @@ function NestedDroppable({
   return (
     <div
       ref={setNodeRef}
-      className={`relative transition-all duration-200 ${
-        isOver
-          ? "bg-violet-50 border-violet-300"
-          : "border-dashed border-gray-300"
-      } border`}
+      className={`relative transition-all duration-200 ${isOver
+        ? "bg-violet-50 border-violet-300"
+        : "border-dashed border-gray-300"
+        } border`}
       style={containerStyle}
       onClick={(e) => {
         e.stopPropagation();
@@ -741,7 +742,7 @@ function Canvas({ components, setComponents, setSelectedElement }) {
       if (
         historyStack.length === 0 ||
         JSON.stringify(historyStack[historyStack.length - 1]) !==
-          JSON.stringify(components)
+        JSON.stringify(components)
       ) {
         setHistoryStack((prev) => [
           ...prev,
@@ -791,22 +792,20 @@ function Canvas({ components, setComponents, setSelectedElement }) {
         <button
           onClick={handleUndo}
           disabled={historyStack.length <= 1}
-          className={`px-4 py-2 rounded-md font-medium transition-colors ${
-            historyStack.length <= 1
-              ? "opacity-50 cursor-not-allowed bg-slate-200 text-slate-500"
-              : "bg-blue-300 hover:bg-blue-700 hover:text-white text-slate-800 shadow-sm border border-slate-200"
-          }`}
+          className={`px-4 py-2 rounded-md font-medium transition-colors ${historyStack.length <= 1
+            ? "opacity-50 cursor-not-allowed bg-slate-200 text-slate-500"
+            : "bg-blue-300 hover:bg-blue-700 hover:text-white text-slate-800 shadow-sm border border-slate-200"
+            }`}
         >
           Undo
         </button>
         <button
           onClick={handleRedo}
           disabled={futureStack.length === 0}
-          className={`px-4 py-2 rounded-md font-medium transition-colors ${
-            futureStack.length === 0
-              ? "opacity-50 cursor-not-allowed bg-slate-200 text-slate-500"
-              : "bg-emerald-300 hover:bg-emerald-700 hover:text-white text-slate-900 shadow-sm border border-slate-200"
-          }`}
+          className={`px-4 py-2 rounded-md font-medium transition-colors ${futureStack.length === 0
+            ? "opacity-50 cursor-not-allowed bg-slate-200 text-slate-500"
+            : "bg-emerald-300 hover:bg-emerald-700 hover:text-white text-slate-900 shadow-sm border border-slate-200"
+            }`}
         >
           Redo
         </button>
@@ -814,11 +813,10 @@ function Canvas({ components, setComponents, setSelectedElement }) {
 
       <div
         ref={setNodeRef}
-        className={`min-h-[400px] border-2 border-dashed ${
-          isOver
-            ? "border-violet-400 bg-violet-100"
-            : "border-slate-300 bg-slate-50"
-        } p-4 flex flex-col gap-3 overflow-auto flex-1 relative transition-colors duration-200`}
+        className={`min-h-[400px] border-2 border-dashed ${isOver
+          ? "border-violet-400 bg-violet-100"
+          : "border-slate-300 bg-slate-50"
+          } p-4 flex flex-col gap-3 overflow-auto flex-1 relative transition-colors duration-200`}
       >
         {components.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
@@ -1158,31 +1156,28 @@ function RightPanel({ selectedElement, setComponents, components }) {
             <div className="grid grid-cols-3 gap-1">
               <button
                 onClick={() => updateStyle("textAlign", "left")}
-                className={`p-2 border ${
-                  element?.style?.textAlign === "left"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${element?.style?.textAlign === "left"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
               >
                 Left
               </button>
               <button
                 onClick={() => updateStyle("textAlign", "center")}
-                className={`p-2 border ${
-                  element?.style?.textAlign === "center"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${element?.style?.textAlign === "center"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
               >
                 Center
               </button>
               <button
                 onClick={() => updateStyle("textAlign", "right")}
-                className={`p-2 border ${
-                  element?.style?.textAlign === "right"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${element?.style?.textAlign === "right"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
               >
                 Right
               </button>
@@ -1196,31 +1191,28 @@ function RightPanel({ selectedElement, setComponents, components }) {
             <div className="grid grid-cols-3 gap-1">
               <button
                 onClick={() => updateStyle("display", "block")}
-                className={`p-2 border ${
-                  element?.style?.display === "block"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${element?.style?.display === "block"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
               >
                 Block
               </button>
               <button
                 onClick={() => updateStyle("display", "inline")}
-                className={`p-2 border ${
-                  element?.style?.display === "inline"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${element?.style?.display === "inline"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
               >
                 Inline
               </button>
               <button
                 onClick={() => updateStyle("display", "flex")}
-                className={`p-2 border ${
-                  element?.style?.display === "flex"
-                    ? "bg-violet-100 border-violet-300 text-violet-700"
-                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                } rounded text-sm font-medium transition-colors`}
+                className={`p-2 border ${element?.style?.display === "flex"
+                  ? "bg-violet-100 border-violet-300 text-violet-700"
+                  : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                  } rounded text-sm font-medium transition-colors`}
               >
                 Flex
               </button>
@@ -1236,22 +1228,20 @@ function RightPanel({ selectedElement, setComponents, components }) {
               <div className="grid grid-cols-2 gap-1">
                 <button
                   onClick={() => updateStyle("flexDirection", "row")}
-                  className={`p-2 border ${
-                    element?.style?.flexDirection === "row" ||
+                  className={`p-2 border ${element?.style?.flexDirection === "row" ||
                     !element?.style?.flexDirection
-                      ? "bg-violet-100 border-violet-300 text-violet-700"
-                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
                 >
                   Row
                 </button>
                 <button
                   onClick={() => updateStyle("flexDirection", "column")}
-                  className={`p-2 border ${
-                    element?.style?.flexDirection === "column"
-                      ? "bg-violet-100 border-violet-300 text-violet-700"
-                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${element?.style?.flexDirection === "column"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
                 >
                   Column
                 </button>
@@ -1268,41 +1258,37 @@ function RightPanel({ selectedElement, setComponents, components }) {
               <div className="grid grid-cols-2 gap-1">
                 <button
                   onClick={() => updateStyle("justifyContent", "flex-start")}
-                  className={`p-2 border ${
-                    element?.style?.justifyContent === "flex-start"
-                      ? "bg-violet-100 border-violet-300 text-violet-700"
-                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${element?.style?.justifyContent === "flex-start"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
                 >
                   Start
                 </button>
                 <button
                   onClick={() => updateStyle("justifyContent", "center")}
-                  className={`p-2 border ${
-                    element?.style?.justifyContent === "center"
-                      ? "bg-violet-100 border-violet-300 text-violet-700"
-                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${element?.style?.justifyContent === "center"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
                 >
                   Center
                 </button>
                 <button
                   onClick={() => updateStyle("justifyContent", "flex-end")}
-                  className={`p-2 border ${
-                    element?.style?.justifyContent === "flex-end"
-                      ? "bg-violet-100 border-violet-300 text-violet-700"
-                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${element?.style?.justifyContent === "flex-end"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
                 >
                   End
                 </button>
                 <button
                   onClick={() => updateStyle("justifyContent", "space-between")}
-                  className={`p-2 border ${
-                    element?.style?.justifyContent === "space-between"
-                      ? "bg-violet-100 border-violet-300 text-violet-700"
-                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${element?.style?.justifyContent === "space-between"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
                 >
                   Space Between
                 </button>
@@ -1319,41 +1305,37 @@ function RightPanel({ selectedElement, setComponents, components }) {
               <div className="grid grid-cols-2 gap-1">
                 <button
                   onClick={() => updateStyle("alignItems", "flex-start")}
-                  className={`p-2 border ${
-                    element?.style?.alignItems === "flex-start"
-                      ? "bg-violet-100 border-violet-300 text-violet-700"
-                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${element?.style?.alignItems === "flex-start"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
                 >
                   Start
                 </button>
                 <button
                   onClick={() => updateStyle("alignItems", "center")}
-                  className={`p-2 border ${
-                    element?.style?.alignItems === "center"
-                      ? "bg-violet-100 border-violet-300 text-violet-700"
-                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${element?.style?.alignItems === "center"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
                 >
                   Center
                 </button>
                 <button
                   onClick={() => updateStyle("alignItems", "flex-end")}
-                  className={`p-2 border ${
-                    element?.style?.alignItems === "flex-end"
-                      ? "bg-violet-100 border-violet-300 text-violet-700"
-                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${element?.style?.alignItems === "flex-end"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
                 >
                   End
                 </button>
                 <button
                   onClick={() => updateStyle("alignItems", "stretch")}
-                  className={`p-2 border ${
-                    element?.style?.alignItems === "stretch"
-                      ? "bg-violet-100 border-violet-300 text-violet-700"
-                      : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
-                  } rounded text-sm font-medium transition-colors`}
+                  className={`p-2 border ${element?.style?.alignItems === "stretch"
+                    ? "bg-violet-100 border-violet-300 text-violet-700"
+                    : "bg-slate-50 border-slate-300 text-slate-700 hover:bg-violet-100"
+                    } rounded text-sm font-medium transition-colors`}
                 >
                   Stretch
                 </button>
@@ -1527,10 +1509,10 @@ function RightPanel({ selectedElement, setComponents, components }) {
                 value={
                   element?.style?.background?.startsWith("rgba")
                     ? Number.parseFloat(
-                        element.style.background.match(
-                          /rgba$$(\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)$$/
-                        )[4]
-                      ) * 100
+                      element.style.background.match(
+                        /rgba$$(\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)$$/
+                      )[4]
+                    ) * 100
                     : 100
                 }
                 className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-400"
@@ -1538,12 +1520,12 @@ function RightPanel({ selectedElement, setComponents, components }) {
               <span className="ml-3 min-w-[40px] text-center text-sm font-medium bg-violet-100 py-1 px-2 rounded">
                 {element?.style?.background?.startsWith("rgba")
                   ? Math.round(
-                      Number.parseFloat(
-                        element.style.background.match(
-                          /rgba$$(\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)$$/
-                        )[4]
-                      ) * 100
-                    )
+                    Number.parseFloat(
+                      element.style.background.match(
+                        /rgba$$(\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)$$/
+                      )[4]
+                    ) * 100
+                  )
                   : 100}
                 %
               </span>
@@ -2443,9 +2425,8 @@ function PreviewModal({ components, isOpen, setIsOpen }) {
 
     // Handle self-closing tags
     if (comp.closing === 0) {
-      return `<${comp.type} style="${styleStr}" ${
-        comp.src ? `src="${comp.src}"` : ""
-      } ${comp.alt ? `alt="${comp.alt}"` : ""} />`;
+      return `<${comp.type} style="${styleStr}" ${comp.src ? `src="${comp.src}"` : ""
+        } ${comp.alt ? `alt="${comp.alt}"` : ""} />`;
     }
 
     // Handle container with children
@@ -2456,9 +2437,8 @@ function PreviewModal({ components, isOpen, setIsOpen }) {
         .join("");
     }
 
-    return `<${comp.type} style="${styleStr}" ${
-      comp.href ? `href="${comp.href}"` : ""
-    }>${comp.content || ""}${childrenHTML}</${comp.type}>`;
+    return `<${comp.type} style="${styleStr}" ${comp.href ? `href="${comp.href}"` : ""
+      }>${comp.content || ""}${childrenHTML}</${comp.type}>`;
   };
 
   const htmlOutput = components
@@ -2530,7 +2510,6 @@ function PreviewModal({ components, isOpen, setIsOpen }) {
 
 function CodeExportModal({ components, isOpen, setIsOpen }) {
   if (!isOpen) return null;
-
   const generateReactCode = () => {
     const imports = `import React from 'react';\n\n`;
 
@@ -2542,13 +2521,10 @@ function CodeExportModal({ components, isOpen, setIsOpen }) {
 
       // Handle self-closing tags
       if (comp.closing === 0) {
-        return `${indentStr}<${
-          comp.type
-        }\n${indentStr}  style={${styleObj}}\n${indentStr}  ${
-          comp.src ? `src="${comp.src}"` : ""
-        }\n${indentStr}  ${
-          comp.alt ? `alt="${comp.alt}"` : ""
-        }\n${indentStr}/>`;
+        return `${indentStr}<${comp.type
+          }\n${indentStr}  style={${styleObj}}\n${indentStr}  ${comp.src ? `src="${comp.src}"` : ""
+          }\n${indentStr}  ${comp.alt ? `alt="${comp.alt}"` : ""
+          }\n${indentStr}/>`;
       }
 
       // Handle container with children
@@ -2557,16 +2533,13 @@ function CodeExportModal({ components, isOpen, setIsOpen }) {
         childrenJSX = comp.children
           .map((child) => renderComponentToJSX(child, indent + 1))
           .join("\n");
-        return `${indentStr}<${comp.type} style={${styleObj}} ${
-          comp.href ? `href="${comp.href}"` : ""
-        }>\n${
-          comp.content ? `${indentStr}  ${comp.content}\n` : ""
-        }${childrenJSX}\n${indentStr}</${comp.type}>`;
+        return `${indentStr}<${comp.type} style={${styleObj}} ${comp.href ? `href="${comp.href}"` : ""
+          }>\n${comp.content ? `${indentStr}  ${comp.content}\n` : ""
+          }${childrenJSX}\n${indentStr}</${comp.type}>`;
       }
 
-      return `${indentStr}<${comp.type} style={${styleObj}} ${
-        comp.href ? `href="${comp.href}"` : ""
-      }>${comp.content || ""}</${comp.type}>`;
+      return `${indentStr}<${comp.type} style={${styleObj}} ${comp.href ? `href="${comp.href}"` : ""
+        }>${comp.content || ""}</${comp.type}>`;
     };
 
     const componentJSX = components
@@ -2635,11 +2608,14 @@ ${componentJSX}
 }
 
 export default function PageBuilder({ onLogout }) {
+  let { websiteId } = useParams();
   const [components, setComponents] = useState([]);
   const [selectedElement, setSelectedElement] = useState(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isCodeExportModalOpen, setIsCodeExportModalOpen] = useState(false);
   const [userData, setUserData] = useState(null);
+        const navigate = useNavigate();
+
 
   useEffect(() => {
     // Check if user is authenticated
@@ -2648,7 +2624,42 @@ export default function PageBuilder({ onLogout }) {
     if (storedUserData) {
       setUserData(JSON.parse(storedUserData));
     }
+    if (websiteId !== "new") {
+
+      getSourceCode().then((sourceCode) => {
+
+        if (!Array.isArray(sourceCode)) {
+          console.error("Fetched sourceCode is not an array:", sourceCode);
+          return;
+        }
+
+        const comp = JSON.parse(sourceCode);
+
+        setComponents(comp);
+
+      });
+    }
+
   }, []);
+
+  const getSourceCode = async () => {
+    const endpoint = `http://localhost:8000/api/v1/websites/website/:${websiteId}`;
+    const response = await axios.get(endpoint, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("userAccessToken")}`,
+      },
+      withCredentials: true,
+    });
+    if (response.status === 200) {
+      const sourceCode = response.data.data.sourcecode;
+     
+      return sourceCode;
+    } else {
+      console.error("Failed to fetch source code");
+      return null;
+    }
+  }
+
 
   const handleMenuAction = (action) => {
     if (action === "logout") {
@@ -2749,7 +2760,72 @@ export default function PageBuilder({ onLogout }) {
         }
       }
     }
-  };
+  };  const save = async () => {
+
+    console.log("Saving components:", components);
+    if (!userData) {
+      alert("Please log in to save your work.");
+      return;
+    }
+
+    try {
+      if (websiteId === "new") {
+        // Prompt user for website name
+        const websiteName = prompt("Please enter a name for your website:", "");
+        
+        // If user cancels, abort the save operation
+        if (websiteName === null) {
+          return;
+        }
+        
+        console.log(components);
+        const endpoint = "http://localhost:8000/api/v1/websites/websites";
+        const formData = new FormData();
+        formData.append("sourcecode", JSON.stringify(components));
+        formData.append("name", websiteName);
+        const response = await axios.post(endpoint, formData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userAccessToken")}`,
+            // Note: DO NOT set Content-Type manually — let Axios set it automatically
+          },
+          withCredentials: true, // 👈 sends cookies with request
+        });
+
+        console.log("Response:", response.data.data._id);
+        if (response.status === 200) {
+          alert("Page saved successfully!");
+          navigate(`/editor/${response.data.data._id}`);
+        } else {
+          alert("Failed to save the page.");
+        }
+      }      else {
+        const endpoint = `http://localhost:8000/api/v1/websites/updatewebsites/:${websiteId}`;
+        
+        const formData = new FormData();
+        formData.append("sourcecode", JSON.stringify(components));
+        // Keep original name for updates
+        formData.append("name", "New Website");
+        const response = await axios.patch(endpoint,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("userAccessToken")}`,
+            },
+          }
+        );
+        console.log("Response:", response.data);
+        if (response.status === 200) {
+          alert("Page updated successfully!");
+          
+        } else {
+          alert("Failed to update the page.");
+        }
+      }
+    } catch (error) {
+      alert("An error occurred while saving the page.");
+      console.error("Error saving page:", error);
+    }
+  }
 
   return (
     <div>
@@ -2778,6 +2854,17 @@ export default function PageBuilder({ onLogout }) {
 
           <div className="fixed bottom-6 right-6 flex gap-3 z-10">
             <button
+              onClick={() => {
+                // Add save functionality here
+                save();
+                // Actual save implementation would go here
+              }}
+              className="px-5 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none rounded-lg cursor-pointer shadow-lg hover:from-blue-600 hover:to-blue-700 transition-colors font-medium"
+            >
+              Save
+            </button>
+
+            <button
               onClick={() => setIsPreviewModalOpen(true)}
               className="px-5 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none rounded-lg cursor-pointer shadow-lg hover:from-emerald-600 hover:to-emerald-700 transition-colors font-medium"
             >
@@ -2805,6 +2892,7 @@ export default function PageBuilder({ onLogout }) {
           setIsOpen={setIsCodeExportModalOpen}
         />
       </DndContext>
+
     </div>
   );
 }

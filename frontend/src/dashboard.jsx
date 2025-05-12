@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "./components/navigation";
 import "./dashboard.css";
@@ -13,9 +13,29 @@ import axios from "axios";
 
 export default function Dashboard({ onLogout }) {
   const [userData, setUserData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [projects, setProjects] = useState([]);
   const navigate = useNavigate();
+
+  const fetchProjects = async () =>{
+    try {
+      const allprojects = await axios.get(
+        "http://localhost:8000/api/v1/websites/websiteuser",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userAccessToken")}`,
+          },
+        }
+      );
+      console.log("Projects fetched:", allprojects);
+      return allprojects.data.data;
+      
+      
+    } catch (error) {
+      
+    }
+  }
+  useEffect(() => {}, 
+  [projects]);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -33,32 +53,19 @@ export default function Dashboard({ onLogout }) {
     } else {
       navigate("/");
     }
+    ;(async()=>{
+      const allprojects = await fetchProjects();
+      setProjects(allprojects);
+      console.log("Projects fetched:", allprojects);
+    })()
+
+
+   
 
     // Fetch projects from API (to be implemented later)
     // For now, we'll use mock data
-    setTimeout(() => {
-      setProjects([
-        {
-          id: 1,
-          name: "Landing Page",
-          lastEdited: "2 days ago",
-          thumbnail: "/placeholder.svg?height=150&width=250",
-        },
-        {
-          id: 2,
-          name: "Portfolio Site",
-          lastEdited: "1 week ago",
-          thumbnail: "/placeholder.svg?height=150&width=250",
-        },
-        {
-          id: 3,
-          name: "Blog Template",
-          lastEdited: "3 weeks ago",
-          thumbnail: "/placeholder.svg?height=150&width=250",
-        },
-      ]);
-      setIsLoading(false);
-    }, 1000);
+    
+    
   }, []);
 
   const handleMenuAction = (action) => {
@@ -77,7 +84,7 @@ export default function Dashboard({ onLogout }) {
       window.dispatchEvent(new Event("authChange"));
 
       const logout = await axios.post(
-        "https://it-project-2025.onrender.com/api/v1/user/logout",
+        "http://localhost:8000/api/v1/user/logout",
         {}, // empty request body
         {
           headers: {
@@ -101,11 +108,12 @@ export default function Dashboard({ onLogout }) {
   };
 
   const handleEditProject = (projectId) => {
-    navigate("/editor", { state: { projectId } });
+    console.log("Editing project with ID:", projectId);
+    navigate(`/editor/${projectId}`);
   };
 
   const handleNewProject = () => {
-    navigate("/editor");
+    navigate("/editor/new");
   };
 
   const handleNewTemplate = (template) => {
@@ -119,15 +127,30 @@ export default function Dashboard({ onLogout }) {
       navigate("/template/ecomm");
     }
   };
-
-  if (isLoading) {
+  const listAllProjects = () => {
+    console.log(projects)
+    console.log(Array.isArray(projects)); 
+  return projects.map((project) => {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading your dashboard...</p>
+      <div key={project._id} className="project-card">
+        <div className="project-info">
+          <h3>{project.name}</h3>
+          <h3>last updated at {project.updatedAt}</h3>
+        </div>
+        <button
+          onClick={() => handleEditProject(project._id)}
+          className="edit-project-button"
+        >
+          Edit Project
+        </button>
       </div>
     );
-  }
+  });
+};
+
+
+
+  
 
   return (
     <div className="dashboard-container">
@@ -181,6 +204,8 @@ export default function Dashboard({ onLogout }) {
         <section className="projects-section">
           <div className="section-header">
             <h2>Recent Projects</h2>
+            {listAllProjects()}
+            
             <button className="view-all">View all</button>
           </div>
 

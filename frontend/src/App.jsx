@@ -45,39 +45,39 @@ function App() {
             }
           />
 
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               isAuthenticated ? <Dashboard onLogout={handleLogout} /> : <Navigate to="/auth" />
-            } 
+            }
           />
-          <Route 
-            path="/editor" 
+          <Route
+            path="/editor/:websiteId?"
             element={
               isAuthenticated ? <Editor onLogout={handleLogout} /> : <Navigate to="/auth" />
-            } 
+            }
           />
-          <Route 
-            path="/template/ecomm" 
+          <Route
+            path="/template/ecomm"
             element={
               isAuthenticated ? <Template onLogout={handleLogout} type={"ecomm"} /> : <Navigate to="/auth" />
-            } 
+            }
           />
-          <Route 
-            path="/template/saas" 
+          <Route
+            path="/template/saas"
             element={
               isAuthenticated ? <Template onLogout={handleLogout} type={"saas"} /> : <Navigate to="/auth" />
-            } 
+            }
           />
-          <Route 
-            path="/template/marketing" 
+          <Route
+            path="/template/marketing"
             element={
               isAuthenticated ? <Template onLogout={handleLogout} type={"marketing"} /> : <Navigate to="/auth" />
-            } 
+            }
           />
-           <Route path="/support" element={<Support />} />
-           <Route path="/about" element={<AboutPage />} />
-           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
