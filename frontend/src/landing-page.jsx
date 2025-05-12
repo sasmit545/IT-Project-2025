@@ -9,8 +9,7 @@ export default function LandingPage() {
         <Squares direction="diagonal" speed={0.5} borderColor="rgba(56, 189, 248, 0.1)" squareSize={50} />
       </div>
       <div className="landing-content">
-        <div className="landing-header">
-          <div className="logo">
+        <div className="landing-header">          <div className="logo">
             <span className="logo-square"></span>
             <span className="logo-text">SiteBuilder</span>
           </div>
@@ -18,7 +17,7 @@ export default function LandingPage() {
             <Link to="/auth" className="nav-link">
               Login
             </Link>
-            <Link to="/auth" className="nav-button">
+            <Link to="/dashboard" className="nav-button">
               Get Started
             </Link>
           </div>
@@ -77,22 +76,14 @@ export default function LandingPage() {
             </div>
             <div className="footer-links">
               <div className="footer-column">
-                <h4>Product</h4>
-                <a href="#features">Features</a>
-                <a href="#pricing">Pricing</a>
-                <a href="#templates">Templates</a>
-              </div>
-              <div className="footer-column">
-                <h4>Company</h4>
-                <a href="#about">About Us</a>
-                <a href="#careers">Careers</a>
-                <a href="#contact">Contact</a>
+                <h4>About </h4>
+                <Link to="/about">About Us</Link>
+                <Link to="/contact">Contact</Link>
               </div>
               <div className="footer-column">
                 <h4>Resources</h4>
-                <a href="#blog">Blog</a>
-                <a href="#docs">Documentation</a>
-                <a href="#support">Support</a>
+                <a href="https://drive.google.com/file/d/18H6BSF_bJrAO_LT_jAKnylnq3xZasSQo/view?usp=drive_link" target="_blank" rel="noopener noreferrer">Documentation</a>
+                <Link to="/support">Support</Link>
               </div>
             </div>
           </div>

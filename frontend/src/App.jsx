@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -8,6 +7,9 @@ import Dashboard from "./dashboard.jsx"
 import LandingPage from "./landing-page.jsx"
 import Editor from "./pages/editor"
 import Template from "./pages/editor/template.jsx"
+import Support from "./pages/extras/Support.jsx"
+import AboutPage from "./pages/about.jsx"
+import ContactPage from "./pages/contact.jsx"
 import "./App.css"
 
 function App() {
@@ -35,8 +37,7 @@ function App() {
   return (
     <Router>
       <div className="app-container">
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
+        <Routes>          <Route path="/" element={<LandingPage />} />
           <Route
             path="/auth"
             element={
@@ -74,6 +75,9 @@ function App() {
               isAuthenticated ? <Template onLogout={handleLogout} type={"marketing"} /> : <Navigate to="/auth" />
             } 
           />
+           <Route path="/support" element={<Support />} />
+           <Route path="/about" element={<AboutPage />} />
+           <Route path="/contact" element={<ContactPage />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
