@@ -2643,7 +2643,7 @@ export default function PageBuilder({ onLogout }) {
   }, []);
 
   const getSourceCode = async () => {
-    const endpoint = `http://it-project-2025.onrender.com/api/v1/websites/website/:${websiteId}`;
+    const endpoint = `https://it-project-2025.onrender.com/api/v1/websites/website/:${websiteId}`;
     const response = await axios.get(endpoint, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("userAccessToken")}`,
@@ -2779,7 +2779,7 @@ export default function PageBuilder({ onLogout }) {
         }
         
         console.log(components);
-        const endpoint = "http://it-project-2025.onrender.com/api/v1/websites/websites";
+        const endpoint = "https://it-project-2025.onrender.com/api/v1/websites/websites";
         const formData = new FormData();
         formData.append("sourcecode", JSON.stringify(components));
         formData.append("name", websiteName);
@@ -2799,7 +2799,7 @@ export default function PageBuilder({ onLogout }) {
           alert("Failed to save the page.");
         }
       }      else {
-        const endpoint = `http://it-project-2025.onrender.com/api/v1/websites/updatewebsites/:${websiteId}`;
+        const endpoint = `https://it-project-2025.onrender.com/api/v1/websites/updatewebsites/:${websiteId}`;
         
         const formData = new FormData();
         formData.append("sourcecode", JSON.stringify(components));
