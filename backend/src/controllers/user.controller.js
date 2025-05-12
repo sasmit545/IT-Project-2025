@@ -84,7 +84,6 @@ const loginUser = asyncHandler(async (req, res) => {
             )
         )
     } catch (error) {
-        console.log(error)
         if (error.statusCode === undefined) {
             error.statusCode = 500
         }

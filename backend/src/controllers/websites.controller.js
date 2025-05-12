@@ -10,15 +10,10 @@ const openwebsitebyid  = asyncHandler(async (req, res) => {
     try {
         console.log("Open website by id request received")
         let {websiteid} = req.params
-        console.log(websiteid)
-        websiteid = websiteid.replace(/:/g, "")
-        console.log(websiteid)
-        
-        
+        websiteid = websiteid.replace(/:/g, "") 
         if (!mongoose.isValidObjectId(websiteid)) {
             throw new ApiError(400, "Invalid website id")
         }
-        
         if (!websiteid) {
             throw new ApiError(400, "Please provide all required fields")
         }
@@ -32,7 +27,6 @@ const openwebsitebyid  = asyncHandler(async (req, res) => {
             data: website
         })
     } catch (error) {
-        console.log(error)
         if (error.statusCode === undefined) {
             error.statusCode = 500
         }
@@ -53,9 +47,7 @@ const listAllWebsitesByUserId = asyncHandler(async (req, res) => {
         if (!userid) {
             throw new ApiError(400, "Please provide all required fields")
         }
-        console.log(userid)
         const websites=await Website.find({owner:userid}).populate('owner')
-        console.log(websites)
         if (!websites) {
             throw new ApiError(404, "Websites not found")
         }
@@ -114,12 +106,8 @@ const updateWebsite = asyncHandler(async (req, res) => {
         console.log("Update website request received")
         let {websiteid} = req.params
         websiteid = websiteid.replace(/:/g, "")
-        
-        console.log(websiteid)
         const {sourcecode, name} = req.body
-
         if (!websiteid || !sourcecode || !name) {
-            console.log("Invalid website id")
             throw new ApiError(400, "Please provide all required fields")
         }
         const website=await Website.findByIdAndUpdate(websiteid, {
@@ -135,7 +123,6 @@ const updateWebsite = asyncHandler(async (req, res) => {
             data: website
         })
     } catch (error) {
-        console.log(error)
         if (error.statusCode === undefined) {
             error.statusCode = 500
         }
