@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "./components/navigation";
 import "./dashboard.css";
@@ -14,6 +14,7 @@ import axios from "axios";
 export default function Dashboard({ onLogout }) {
   const [userData, setUserData] = useState(null);
   const [projects, setProjects] = useState([]);
+  const [showAllProjects, setShowAllProjects] = useState(false);
   const navigate = useNavigate();
 
   const fetchProjects = async () =>{
@@ -126,27 +127,28 @@ export default function Dashboard({ onLogout }) {
     } else if (template.name === "E-commerce") {
       navigate("/template/ecomm");
     }
+  };  // Format the date in a user-friendly way
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
   };
-  const listAllProjects = () => {
-    console.log(projects)
-    console.log(Array.isArray(projects)); 
-  return projects.map((project) => {
-    return (
-      <div key={project._id} className="project-card">
-        <div className="project-info">
-          <h3>{project.name}</h3>
-          <h3>last updated at {project.updatedAt}</h3>
-        </div>
-        <button
-          onClick={() => handleEditProject(project._id)}
-          className="edit-project-button"
-        >
-          Edit Project
-        </button>
-      </div>
+
+  // Get visible projects - either all projects or just the most recent ones
+  const getVisibleProjects = () => {
+    if (!projects || !Array.isArray(projects)) return [];
+    
+    // Sort projects by updatedAt date (most recent first)
+    const sortedProjects = [...projects].sort((a, b) => 
+      new Date(b.updatedAt) - new Date(a.updatedAt)
     );
-  });
-};
+    
+    // Return either all projects or just the first 3
+    return showAllProjects ? sortedProjects : sortedProjects.slice(0, 3);
+  };
 
 
 
@@ -199,17 +201,38 @@ export default function Dashboard({ onLogout }) {
             </svg>
             Import Project
           </button>
-        </div>
-
-        <section className="projects-section">
+        </div>        <section className="projects-section">
           <div className="section-header">
             <h2>Recent Projects</h2>
-            {listAllProjects()}
-            
-            <button className="view-all">View all</button>
+            <button 
+              className="view-all" 
+              onClick={() => setShowAllProjects(!showAllProjects)}
+            >
+              {showAllProjects ? "Show Recent" : "View all"}
+            </button>
           </div>
 
-          <div className="projects-grid">
+          <div className="projects-grid">            {getVisibleProjects().map((project) => (
+              <div key={project._id} className="project-card">
+                <div className="project-thumbnail">
+                  <img 
+                    src={placeholderImg} 
+                    alt={`${project.name} Thumbnail`} 
+                  />
+                </div>
+                <div className="project-info">
+                  <h3>{project.name}</h3>
+                  <p>Last updated: {formatDate(project.updatedAt)}</p>
+                </div>
+                <button
+                  onClick={() => handleEditProject(project._id)}
+                  className="use-template-button"
+                >
+                  Edit Project
+                </button>
+              </div>
+            ))}
+            
             <div className="project-card new-project">
               <button
                 onClick={handleNewProject}
@@ -220,12 +243,10 @@ export default function Dashboard({ onLogout }) {
               </button>
             </div>
           </div>
-        </section>
-
-        <section className="templates-section">
+        </section>        <section className="templates-section">
           <div className="section-header">
             <h2>Templates</h2>
-            <button className="view-all">View all</button>
+            <button className="view-all">View all templates</button>
           </div>
 
           <div className="templates-grid">

@@ -337,13 +337,16 @@
 .project-info,
 .template-info {
   padding: 1rem;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
 }
 
 .project-info h3,
 .template-info h3 {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
   color: #0f172a;
 }
 
@@ -351,6 +354,7 @@
 .template-info p {
   font-size: 0.75rem;
   color: #64748b;
+  margin-bottom: 0;
 }
 
 .project-actions {
