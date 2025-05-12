@@ -10,7 +10,7 @@
 
 ### Editor Interface
 
-![Editor](https://res.cloudinary.com/dfgoyoeml/image/upload/v1746971897/qlxma0n0mnenbni9wq3p.png)
+![Editor](https://res.cloudinary.com/dfgoyoeml/image/upload/v1746972919/aajqsii0amtnnwsmljpt.png)
 
 ### Dashboard
 
@@ -115,4 +115,12 @@ sitebbuilder/
 ├── .gitignore
 ├── README.md
 ```
+---
+## Team Members
+
+* Arush Singh Kiron— 2301AI03
+* Rahul Jilowa — 2301AI18
+* Sasmit Shashwat — 2301AI20
+* Shresth Kasyap — 2301AI22
+* Harsh Raj — 2301AI47
 
