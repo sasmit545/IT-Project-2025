@@ -46,9 +46,10 @@ export default function AuthForm({ onAuthentication }) {
     const interval = setInterval(() => {
       setCurrentTextIndex((prevIndex) => (prevIndex + 1) % dynamicTexts.length);
     }, 5000);
-
+    
     return () => {
-      clearInterval(interval);
+      
+      // clearInterval(interval);
       window.removeEventListener("resize", checkIfMobile);
     };
   }, []);
@@ -70,7 +71,7 @@ export default function AuthForm({ onAuthentication }) {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-    const loginUrl = "https://it-project-2025.onrender.com/api/v1/user/login";
+    const loginUrl = "http://localhost:8000/api/v1/user/login";
     try {
       const resp = await axios.post(loginUrl, loginData, {
         headers: {
@@ -107,7 +108,7 @@ export default function AuthForm({ onAuthentication }) {
     setError("");
     setIsLoading(true);
     const registerUrl =
-      "https://it-project-2025.onrender.com/api/v1/user/register";
+      "http://localhost:8000/api/v1/user/register";
     try {
       const details = await axios.post(registerUrl, registerData, {
         headers: {

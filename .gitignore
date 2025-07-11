@@ -10,6 +10,7 @@
 /backend/.env.production.local
 /backend/node_modules/
 /frontend/node_modules/
+/.vscode
 # Logs
 logs
 *.log

@@ -52,14 +52,7 @@ export default function Navigation({ userData, onMenuAction }) {
     <header className="sticky flex justify-center top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-18 items-center justify-between">
 
-        {/* <a href="/dashboard">
-          <div className="flex items-center gap-2">
-            <BuildingLibraryIcon className="h-12 w-12 text-blue-400" />
-            <div className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-600 bg-clip-text text-transparent">
-              SiteBuilder
-            </div>
-          </div>
-        </a> */}
+
 
         <a href="/dashboard">
           <div className="logo">
