@@ -101,6 +101,7 @@
   line-height: 1.2;
   background: linear-gradient(90deg, #ffffff, #38bdf8);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -312,15 +313,6 @@ input::placeholder {
   font-size: 0.875rem;
 }
 
-.success-message {
-  background-color: #dcfce7;
-  color: #16a34a;
-  padding: 0.75rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  font-size: 0.875rem;
-}
-
 .auth-footer {
   text-align: center;
   margin-top: 2rem;
@@ -338,6 +330,28 @@ input::placeholder {
   color: #0ea5e9;
 }
 
+/* Forgot password specific styles */
+.back-to-login {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.back-btn:hover {
+  color: #38bdf8;
+  background-color: rgba(56, 189, 248, 0.1);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .auth-container {
@@ -346,6 +360,12 @@ input::placeholder {
 
   .auth-left {
     display: none;
+  }
+
+  .mobile-brand {
+    display: block;
+    text-align: center;
+    margin-bottom: 2rem;
   }
 
   .auth-right {

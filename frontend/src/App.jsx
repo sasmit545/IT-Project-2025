@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import AuthForm from "./auth.jsx"
 import Dashboard from "./dashboard.jsx"
 import LandingPage from "./landing-page.jsx"
+import ResetPasswordForm from "./reset-password.jsx"
 import Editor from "./pages/editor"
 import Template from "./pages/editor/template.jsx"
 import Support from "./pages/extras/Support.jsx"
@@ -44,6 +45,7 @@ function App() {
               isAuthenticated ? <Navigate to="/dashboard" /> : <AuthForm onAuthentication={setIsAuthenticated} />
             }
           />
+          <Route path="/resetpassword" element={<ResetPasswordForm />} />
 
           <Route
             path="/dashboard"
