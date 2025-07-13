@@ -15,6 +15,11 @@ const WebsiteSchema = new mongoose.Schema({
         type: String,
         required: true,
         default: ""
+    },
+    accessType: {
+        type: Boolean,  //false->private, true->public
+        required: true,
+        default: false
     }
 },{timestamps:true});
 

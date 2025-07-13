@@ -9,6 +9,7 @@ import mongoose from "mongoose"
 const openwebsitebyid  = asyncHandler(async (req, res) => {
     try {
         console.log("Open website by id request received")
+
         let {websiteid} = req.params
         websiteid = websiteid.replace(/:/g, "") 
         if (!mongoose.isValidObjectId(websiteid)) {
@@ -17,16 +18,31 @@ const openwebsitebyid  = asyncHandler(async (req, res) => {
         if (!websiteid) {
             throw new ApiError(400, "Please provide all required fields")
         }
+
         const website=await Website.findById(websiteid).populate('owner')
+        
         if (!website) {
             throw new ApiError(404, "Website not found")
         }
+        // console.log("Website found:", website)
+
+        const isPublic = website.accessType === true
+        const isOwner = req.user?._id && website.owner.toString() === req.user._id.toString()
+
+        if(!isPublic && !isOwner) {
+            console.log("User is not authorized to open this website")
+            throw new ApiError(403, "You are not authorized to open this website")
+        }
+
+        console.log("Website opened successfully")
+
         return res.status(200).json({
             success: true,
             message: "Website opened successfully",
             data: website
         })
-    } catch (error) {
+    } 
+    catch (error) {
         if (error.statusCode === undefined) {
             error.statusCode = 500
         }
@@ -43,20 +59,24 @@ const openwebsitebyid  = asyncHandler(async (req, res) => {
 const listAllWebsitesByUserId = asyncHandler(async (req, res) => {
     try {
         console.log("List all websites by user id request received")
+
         const userid = req.user._id
         if (!userid) {
             throw new ApiError(400, "Please provide all required fields")
         }
+
         const websites=await Website.find({owner:userid}).populate('owner')
         if (!websites) {
             throw new ApiError(404, "Websites not found")
         }
+
         return res.status(200).json({
             success: true,
             message: "Websites listed successfully",
             data: websites
         })
-    } catch (error) {
+    } 
+    catch (error) {
         if (error.statusCode === undefined) {
             error.statusCode = 500
         }
@@ -73,21 +93,26 @@ const listAllWebsitesByUserId = asyncHandler(async (req, res) => {
 const createWebsite = asyncHandler(async (req, res) => {
     try {
         console.log("Create website request received")
-        const {sourcecode, name} = req.body
+        const {sourcecode, name, isPrivate} = req.body
         if (!sourcecode || !name) {
             throw new ApiError(400, "Please provide all required fields")
         }
+
+        // console.log(isPrivate, typeof(isPrivate))
         const website=await Website.create({
             sourcecode,
             name,
-            owner:req.user._id
+            owner:req.user._id,
+            accessType: isPrivate !== "true"
         })
+
         return res.status(200).json({
             success: true,
             message: "Website created successfully",
             data: website
         })
-    } catch (error) {
+    } 
+    catch (error) {
         if (error.statusCode === undefined) {
             error.statusCode = 500
         }
@@ -106,25 +131,45 @@ const updateWebsite = asyncHandler(async (req, res) => {
         console.log("Update website request received")
         let {websiteid} = req.params
         websiteid = websiteid.replace(/:/g, "")
+
         const {sourcecode, name} = req.body
+
         if (!websiteid || !sourcecode || !name) {
             throw new ApiError(400, "Please provide all required fields")
         }
-        const website=await Website.findByIdAndUpdate(websiteid, {
-            sourcecode,
-            name
-        }, {new: true})
-        if (!website) {
+
+        const website = await Website.findById(websiteid)
+
+        if(!website){
             throw new ApiError(404, "Website not found")
         }
+
+        const isOwner = req.user?._id && website.owner.toString() === req.user._id.toString()
+
+        if(!isOwner) {
+            throw new ApiError(403, "You are not authorized to update this website")
+        }
+
+        website.sourcecode = sourcecode
+        website.name = name
+        await website.save()
+
         return res.status(200).json({
             success: true,
             message: "Website updated successfully",
             data: website
         })
-    } catch (error) {
+    } 
+    catch (error) {
         if (error.statusCode === undefined) {
             error.statusCode = 500
+        }
+        if(error.statusCode === 403){
+            return res.status(error.statusCode).json({
+                success: false,
+                message: "You are not authorized to update this website",
+                errorcode: error.statusCode
+            })
         }
         return res.status(error.statusCode).json({
             success: false,

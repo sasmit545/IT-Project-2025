@@ -2777,12 +2777,15 @@ export default function PageBuilder({ onLogout }) {
         if (websiteName === null) {
           return;
         }
-        
+
+        const isPrivate = confirm("Do you want to make this website private?");
+
         console.log(components);
         const endpoint = "https://it-project-2025.onrender.com/api/v1/websites/websites";
         const formData = new FormData();
         formData.append("sourcecode", JSON.stringify(components));
         formData.append("name", websiteName);
+        formData.append("isPrivate", isPrivate);
         const response = await axios.post(endpoint, formData, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userAccessToken")}`,
