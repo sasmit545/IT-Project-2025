@@ -21,7 +21,7 @@ export default function Dashboard({ onLogout }) {
   const fetchProjects = async () =>{
     try {
       const allprojects = await axios.get(
-        "http://localhost:8000/api/v1/websites/websiteuser",
+        "https://it-project-2025.onrender.com/api/v1/websites/websiteuser",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userAccessToken")}`,

@@ -4,6 +4,11 @@ import { ApiResponse } from "../utils/ApiResponse.utils.js"
 import { uploadCloudinary, deleteFromCloudinary } from "../utils/Cloudinary.utils.js"
 import asyncHandler from "../utils/AsyncHandler.utils.js"
 import Website from "../models/website.model.js"
+import {
+    SavePage,
+    GetPage
+} from "../utils/Cache.utils.js"
+import { client } from "../db/redisConnect.js"
 import mongoose from "mongoose"
 
 const openwebsitebyid = asyncHandler(async (req, res) => {
@@ -19,8 +24,40 @@ const openwebsitebyid = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Please provide all required fields")
         }
         
+        // Try to get website from cache first
+        let website;
+        let fromCache = false;
+        try {
+            const cachedResult = await GetPage(websiteid);
+            if (cachedResult.success && cachedResult.fromCache) {
+                // Construct website object from cached data
+                website = {
+                    _id: websiteid,
+                    sourcecode: cachedResult.sourceCode,
+                    // We still need to get other details from database
+                };
+                fromCache = true;
+                console.log("Website source code retrieved from cache");
+            }
+        } catch (cacheError) {
+            console.log("Cache miss or error, fetching from database:", cacheError.message);
+        }
 
-        const website = await Website.findById(websiteid).populate('owner')
+        // If not in cache or need full details, fetch from database
+        if (!fromCache) {
+            website = await Website.findById(websiteid).populate('owner');
+        } else {
+            // Get full website details from database but we have cached sourcecode
+            const fullWebsite = await Website.findById(websiteid).populate('owner');
+            if (fullWebsite) {
+                website = {
+                    ...fullWebsite.toObject(),
+                    sourcecode: website.sourcecode // Use cached sourcecode
+                };
+            } else {
+                website = null;
+            }
+        }
 
         if (!website) {
             throw new ApiError(404, "Website not found")
@@ -69,15 +106,43 @@ const listAllWebsitesByUserId = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Please provide all required fields")
         }
 
-        let websites = await Website.find({ owner: userid }).populate('owner')
+        // Check cache first for latest websites
+        const cacheKey = `user_latest_websites:${userid}`;
+        const cachedWebsites = await client.get(cacheKey);
+        
+        if (cachedWebsites) {
+            console.log("Returning cached latest websites");
+            return res.status(200).json({
+                success: true,
+                message: "Websites listed successfully (from cache)",
+                data: JSON.parse(cachedWebsites)
+            });
+        }
+
+        let websites = await Website.find({ owner: userid }).populate('owner').sort({ updatedAt: -1 })
         if (!websites) {
             throw new ApiError(404, "Websites not found")
         }
+        
+        // Cache individual websites using SavePage utility
+        const latestWebsites = websites.slice(0, Math.min(5, websites.length));
+        for (const website of latestWebsites) {
+            try {
+                await SavePage(website._id);
+            } catch (cacheError) {
+                console.error(`Failed to cache website ${website._id}:`, cacheError.message);
+            }
+        }
+
         const sanitizedDocs = websites.map(doc => {
             const obj = doc.toObject();
             const { owner, sourcecode, createdAt, ...rest } = obj;
             return rest;
         });
+
+        // Cache the latest min(5, number of websites)
+        const latestWebsites_sanitized = sanitizedDocs.slice(0, Math.min(5, sanitizedDocs.length));
+        await client.setEx(cacheKey, 1800, JSON.stringify(latestWebsites_sanitized)); // Cache for 30 minutes
 
         return res.status(200).json({
             success: true,
