@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navigation from "./components/navigation";
+import PixelCard from "./components/PixelCard";
 import "./dashboard.css";
 
 import placeholderImg from "./public/placeholder.svg";
@@ -20,7 +21,7 @@ export default function Dashboard({ onLogout }) {
   const fetchProjects = async () =>{
     try {
       const allprojects = await axios.get(
-        "https://it-project-2025.onrender.com/api/v1/websites/websiteuser",
+        "http://localhost:8000/api/v1/websites/websiteuser",
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userAccessToken")}`,
@@ -215,10 +216,17 @@ export default function Dashboard({ onLogout }) {
           <div className="projects-grid">            {getVisibleProjects().map((project) => (
               <div key={project._id} className="project-card">
                 <div className="project-thumbnail">
-                  <img 
-                    src={placeholderImg} 
-                    alt={`${project.name} Thumbnail`} 
-                  />
+                  {project.thumbnail ? (
+                    <img 
+                      src={project.thumbnail} 
+                      alt={`${project.name} Thumbnail`} 
+                    />
+                  ) : (
+                    <PixelCard
+                      variant="pink"
+                      className="pixel-thumbnail"
+                    />
+                  )}
                 </div>
                 <div className="project-info">
                   <h3>{project.name}</h3>
